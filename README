@@ -1,0 +1,14 @@
+# ScentedWidgetPP
+
+/ext - SWPP chrome extension package
+/toysite - Testing website
+
+To install the extension:
+    1. Open "chrome://extensions" in Chrome
+    2. Click "Load unpacked extension..."
+    3. Select "/ext" directory
+
+To set up the webserver:
+    1. Run "pip install -r requirements.txt" in /toysite
+    2. Run "python manage.py runserver" in /toysite
+    3. Open "http://localhost:5000" in Chrome
