@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Clicks</title>
+        <style> 
+            #container {
+                width: 300px;
+                height: 300px;
+            }
+
+            #button {
+                position: relative;
+                width: 90px;
+                height: 90px;
+                float: left;
+                text-align: center;
+                vertical-align: middle;
+                padding: 5px 5px;
+                line-height: 90px;
+                outline: 1px solid;
+            }
+        </style>
+        <script>
+            function mkButton () {
+               button = document.createElement("div");
+               button.id = "button";
+/*                   button.style.position = "relative";*/
+/*                   button.style.left = i/9 + "%"*/
+/*                   button.style.top  = i/9 + "%"*/
+               link = document.createElement("a");
+               link.setAttribute("href", document.URL + (i+1) + "/");
+               link.innerHTML = (i+1).toString();
+               button.appendChild(link);
+               return button;
+            }
+        </script>
+    </head>
+
+    <body>
+        <div id="container">
+            <script>
+                var container = document.getElementById("container");
+                for (i=0; i < 9; i++) {
+                   container.appendChild(mkButton());
+                }
+            </script>
+        </div>
+    </body>
+</html>
