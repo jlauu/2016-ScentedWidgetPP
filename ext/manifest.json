@@ -24,7 +24,7 @@
   },
   "permissions": [
     "https://ajax.googleapis.com/",
-    "activeTab",
+    "webNavigation",
     "localhost:5000/*",
     "background"
   ]
