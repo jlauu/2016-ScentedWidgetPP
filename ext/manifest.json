@@ -5,7 +5,8 @@
   "description": "Web session modelling and analysis",
   "version": "1.0",
   "background": {
-      "page": "background.html"
+      "persistent": true,
+      "scripts": ["PageVisit.js","Session.js","main.js"]
   },
   "content_scripts": [
       {
@@ -19,7 +20,7 @@
   "browser_action": {
     "default_icon": "icon.png",
     "default_popup": "popup.html",
-    "default_title": "test"
+    "default_title": "ScentedWidgetPP"
   },
   "permissions": [
     "https://ajax.googleapis.com/",
@@ -27,6 +28,7 @@
     "localhost:5000/*",
     "background",
     "history",
-    "tabs"
+    "tabs",
+    "gcm"
   ]
 }
