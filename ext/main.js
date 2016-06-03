@@ -25,7 +25,11 @@ chrome.history.onVisited.addListener (function (historyItem) {
        var pv = new PageVisit(visit.id, session.appID, tabID, windowID, 
                               visit.refferingVisitId, url, visit.visitTime,
                               visit.transition);
-       console.log(pv);
        session.addVisit(pv);
     };
+});
+
+// Save data to file before closing
+chrome.windows.onRemoved.addListener(function (windowId) {
+    session.unload();
 });
