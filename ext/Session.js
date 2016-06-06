@@ -20,17 +20,15 @@ Session.prototype.addVisit = function (pv) {
 
 // Transfer page visits from temp storage to permanent site
 Session.prototype.unload = function () {
-    console.log("unloading...");
-    
-    var data = new Blob([JSON.stringify(this.pageVisits)], 
-                        {type : 'application/json'});
-    var url = URL.createObjectURL(data);
-    chrome.downloads.download({
-       url: url,
-       filename: this.appID + ".json",
-       conflictAction: 'uniquify',
-       saveAs: true
-    });
-
+    var xhr = new XMLHttpRequest();
+    var data = JSON.stringify(this.pageVisits);
+    xhr.open("POST", 'https://swpp-server-stage.herokuapp.com/send', true);
+    xhr.setRequestHeader("Content-type", "application/json");
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            console.log(xhr.responseText);
+        }
+    }
+    xhr.send(data);
     this.pageVisits = [];
 }

@@ -24,8 +24,10 @@
   },
   "permissions": [
     "https://ajax.googleapis.com/",
+    "https://swpp-server-stage.herokuapp.com/*",
     "webNavigation",
     "localhost:5000/*",
+    "127.0.0.1:5000/*",
     "background",
     "history",
     "tabs",
