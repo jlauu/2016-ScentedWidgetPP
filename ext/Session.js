@@ -2,7 +2,7 @@
 'use strict';
 
 function Session() {
-    this.MAX_PAGEVISITS = 10;
+    this.MAX_PAGEVISITS = 50;
     // TODO: better id system
     this.appID = 1;
     // chrome.instanceID.getID(function (id) {instance.appID = id});
@@ -23,6 +23,7 @@ Session.prototype.unload = function () {
     var xhr = new XMLHttpRequest();
     var data = JSON.stringify(this.pageVisits);
     xhr.open("POST", 'https://swpp-server-stage.herokuapp.com/send', true);
+//    xhr.open("POST", 'http://localhost:5000/send', true);
     xhr.setRequestHeader("Content-type", "application/json");
     xhr.onreadystatechange = function () {
         if (xhr.readyState == 4 && xhr.status == 200) {

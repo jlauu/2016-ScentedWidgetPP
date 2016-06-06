@@ -15,7 +15,9 @@ chrome.history.onVisited.addListener (function (historyItem) {
                              processVisitsWithUrl(historyItem.url));
     // Modify browsing session data
     var processVisit = function (url, visit) {
-       var tabID, windowID;
+        var tabID = -1;
+        var windowID = -1;
+        var srcID = visit.refferingVisitId ? visit.refferingVisitId : -1;
        chrome.tabs.query({url: url}, function (tabs) {
                                        if (tabs[0]) {
                                          tabID = tabs[0].id ? tabs[0].id : -1;
@@ -23,7 +25,7 @@ chrome.history.onVisited.addListener (function (historyItem) {
                                        }
        });
        var pv = new PageVisit(visit.id, session.appID, tabID, windowID, 
-                              visit.refferingVisitId, url, visit.visitTime,
+                              srcID, url, visit.visitTime,
                               visit.transition);
        session.addVisit(pv);
     };
