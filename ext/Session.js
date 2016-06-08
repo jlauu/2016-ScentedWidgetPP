@@ -4,8 +4,9 @@
 function Session() {
     this.MAX_PAGEVISITS = 50;
     this.pageVisits = [];
+    var session = this;
     chrome.identity.getProfileUserInfo(function (info) {
-        this.userID = info.id;
+        session.userID= info.id;
     });
 };
 

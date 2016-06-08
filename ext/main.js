@@ -15,9 +15,10 @@ chrome.history.onVisited.addListener (function (historyItem) {
             processVisitsWithUrl(historyItem.url));
     // Modify browsing session data
     var processVisit = function (url, visit) {
-        var tabID, windowID, srcID;
+        var tabID, windowID, srcID, userID;
         srcID = visit.refferingVisitId;
         if (!srcID) srcID = -1;
+        if (!session.userID) userID = -1;
         // capture the tab and window ids if they are still open
         chrome.tabs.query({url: url}, function (tabs) {
           if (tabs.length < 1) {
@@ -34,7 +35,7 @@ chrome.history.onVisited.addListener (function (historyItem) {
                   windowID = tab.windowId;
               }
           }
-          var pv = new PageVisit(visit.id, session.appID, tabID, windowID, 
+          var pv = new PageVisit(visit.id, userID, tabID, windowID, 
                                  srcID, url, visit.visitTime, visit.transition);
           session.addVisit(pv);
         });
