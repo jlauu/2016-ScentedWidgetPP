@@ -3,11 +3,10 @@
 
 function Session() {
     this.MAX_PAGEVISITS = 50;
-    // TODO: better id system
-    this.appID = 1;
-    // chrome.instanceID.getID(function (id) {instance.appID = id});
-    // chrome.instanceID.getCreationTime(function (time) {instance.time = time});
     this.pageVisits = [];
+    chrome.identity.getProfileUserInfo(function (info) {
+        this.userID = info.id;
+    });
 };
 
 // Given a PageVisit instance, add it to this session

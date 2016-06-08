@@ -12,23 +12,33 @@ chrome.history.onVisited.addListener (function (historyItem) {
         };
     };
     chrome.history.getVisits({url: historyItem.url}, 
-                             processVisitsWithUrl(historyItem.url));
+            processVisitsWithUrl(historyItem.url));
     // Modify browsing session data
     var processVisit = function (url, visit) {
-        var tabID = -1;
-        var windowID = -1;
-        var srcID = visit.refferingVisitId ? visit.refferingVisitId : -1;
-       chrome.tabs.query({url: url}, function (tabs) {
-                                       if (tabs[0]) {
-                                         tabID = tabs[0].id ? tabs[0].id : -1;
-                                         windowID = tabs[0].windowId;
-                                       }
-       });
-       var pv = new PageVisit(visit.id, session.appID, tabID, windowID, 
-                              srcID, url, visit.visitTime,
-                              visit.transition);
-       session.addVisit(pv);
-    };
+        var tabID, windowID, srcID;
+        srcID = visit.refferingVisitId;
+        if (!srcID) srcID = -1;
+        // capture the tab and window ids if they are still open
+        chrome.tabs.query({url: url}, function (tabs) {
+          if (tabs.length < 1) {
+              tabID = -1;
+              windowID = -1;
+          } else {
+              // finds the tab that provides the most information
+              var tab = tabs.find(t => !!t.id);
+              if (!tab) {
+                  tabID = -1;
+                  windowID = tabs[0].windowId;
+              } else {
+                  tabID = tab.id;
+                  windowID = tab.windowId;
+              }
+          }
+          var pv = new PageVisit(visit.id, session.appID, tabID, windowID, 
+                                 srcID, url, visit.visitTime, visit.transition);
+          session.addVisit(pv);
+        });
+    }
 });
 
 // Save data to file before closing
