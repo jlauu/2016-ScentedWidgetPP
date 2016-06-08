@@ -18,7 +18,11 @@ chrome.history.onVisited.addListener (function (historyItem) {
         var tabID, windowID, srcID, userID;
         srcID = visit.refferingVisitId;
         if (!srcID) srcID = -1;
-        if (!session.userID) userID = -1;
+        if (!session.userID) {
+            userID = -1;
+        } else {
+            userID = session.userID;
+        }
         // capture the tab and window ids if they are still open
         chrome.tabs.query({url: url}, function (tabs) {
           if (tabs.length < 1) {
