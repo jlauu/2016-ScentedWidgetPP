@@ -3,6 +3,13 @@
 
 var session = new Session();
 
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    // Logs when user clicks a link
+    if (request.type == "link-hit") {
+        session.addLinkHit(request.hit);
+    }
+});
+
 // Logs only urls that enter browser history
 chrome.history.onVisited.addListener (function (historyItem) {
     // Closure to bind url to visit callback
@@ -15,11 +22,12 @@ chrome.history.onVisited.addListener (function (historyItem) {
             processVisitsWithUrl(historyItem.url));
     // Modify browsing session data
     var processVisit = function (url, visit) {
-        var tabID, windowID, srcID, userID;
+        var tabID, windowID, srcID, userID, srcURL;
+        srcURL = "";
         srcID = visit.refferingVisitId;
         if (!srcID) srcID = -1;
         if (!session.userID) {
-            userID = -1;
+            userID = "-1";
         } else {
             userID = session.userID;
         }
@@ -34,13 +42,19 @@ chrome.history.onVisited.addListener (function (historyItem) {
               if (!tab) {
                   tabID = -1;
                   windowID = tabs[0].windowId;
+                  // finding referrer through tab
+                  if (!visit.refferingVisitId) {
+                    chrome.tabs.executeScript
+                        .bind(undefined, {"code":"return document.referrer"})
+                        .call(undefined, rs => srcURL = rs[0] ? rs[0] : srcURL);
+                  } 
               } else {
                   tabID = tab.id;
                   windowID = tab.windowId;
               }
           }
-          var pv = new PageVisit(visit.id, userID, tabID, windowID, 
-                                 srcID, url, visit.visitTime, visit.transition);
+          var pv = new PageVisit(visit.id, userID, tabID, windowID, srcID,
+                                 srcURL, url, visit.visitTime, visit.transition);
           session.addVisit(pv);
         });
     }
