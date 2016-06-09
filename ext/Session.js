@@ -13,6 +13,7 @@ function Session() {
 };
 
 Session.prototype.addLinkHit = function (hit) {
+    hit['userID'] = this.userID;
     this.linksClicked.push(hit);
     if (this.linksClicked.length > this.MAX_LINKCLICKS) {
         this.sendJSON(this.linksClicked, 
