@@ -1,9 +1,10 @@
-// session.js: manager of the a browsing session
+// session.js: browsing session manager
 'use strict';
 
 function Session() {
     this.MAX_PAGEVISITS = 50;
     this.MAX_LINKCLICKS = 50;
+    this.fails = 1;
     this.pageVisits = [];
     this.linksClicked = [];
     var session = this;
@@ -13,22 +14,22 @@ function Session() {
 };
 
 Session.prototype.addLinkHit = function (hit) {
-    hit['userID'] = this.userID;
+    hit['userID'] = this.userid;
     this.linksClicked.push(hit);
-    if (this.linksClicked.length > this.MAX_LINKCLICKS) {
-        this.sendJSON(this.linksClicked, 
+    if (this.linksClicked.length > this.MAX_LINKCLICKS * this.fails) {
+        var success = this.sendJSON(this.linksClicked, 
                       'https://swpp-server-stage.herokuapp.com/sendLinks');
-        this.linksClicked = [];
+        if (success) this.linksClicked = [];
     }
 }
 
 // Given a PageVisit instance, add it to this session
 Session.prototype.addVisit = function (pv) { 
     this.pageVisits.push(pv);
-    if (this.pageVisits.length > this.MAX_PAGEVISITS) {
-        this.sendJSON(this.pageVisits, 
+    if (this.pageVisits.length > this.MAX_PAGEVISITS * this.fails) {
+        var success = this.sendJSON(this.pageVisits, 
                       'https://swpp-server-stage.herokuapp.com/sendVisits');
-        this.pageVisits = [];
+        if (success) this.pageVisits = [];
     }
 };
 
@@ -41,9 +42,13 @@ Session.prototype.sendJSON = function (obj, url) {
     xhr.onreadystatechange = function () {
         if (xhr.readyState == 4 && xhr.status == 200) {
             console.log(xhr.responseText);
+            this.fails = 0;
+        } else {
+            this.fails += 1;
         }
     }
     xhr.send(data);
+    return this.fails <= 1;
 }
 
 // dumps all data to server
