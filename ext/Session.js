@@ -37,7 +37,6 @@ Session.prototype.sendJSON = function (obj, url) {
     var xhr = new XMLHttpRequest();
     var data = JSON.stringify(obj);
     xhr.open("POST", url, true);
-    xhr.open("POST", 'https://swpp-server-stage.herokuapp.com/send', true);
     xhr.setRequestHeader("Content-type", "application/json");
     xhr.onreadystatechange = function () {
         if (xhr.readyState == 4 && xhr.status == 200) {
