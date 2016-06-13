@@ -2,22 +2,27 @@
 // content script - adds callback functions from our background page to
 // elements we are listening to.
 
-if (document.addEventListener) {
-    document.addEventListener('click', onclick, false);
-} else {
-    document.attachEvent('onclick', onclick);
-}
+document.addEventListener('click', mouseHandler, false);
+document.addEventListener('dblclick', mouseHandler, false);
+document.addEventListener('scroll', logInteraction, false);
+document.addEventListener('wheel', logInteraction, false);
+document.addEventListener('change', logInteraction, false);
+document.addEventListener('input', logInteraction, false);
 
-function onclick (e) {
+function mouseHandler (e) {
     var e = window.e || e;
     if (e.target.tagName == 'A') {
-        logLinkClicked(e);
+        logLinkClicked(e.target);
+    } else if (e.currentTarget.tagName == 'A') {
+        logLinkClicked(e.currentTarget);
     }
+
+    logInteraction(e, null);
 }
 
-function logLinkClicked (e) {
+function logLinkClicked (tgt) {
     var from = document.URL;
-    var to = e.target.getAttribute("href")
+    var to = tgt.getAttribute("href")
     var time = Date.now();
     // fixing relative paths
     if (to.indexOf('http') < 0) {
@@ -26,6 +31,20 @@ function logLinkClicked (e) {
         }
         to = from + to;
     }
-    chrome.runtime.sendMessage({type: "link-hit", 
-                                hit: {'from':from, 'to':to, 'time':time}});
+    chrome.runtime.sendMessage({type: "linkClick", 
+                                event: {'from':from, 'to':to, 'time':time}});
+}
+
+function logInteraction (e) {
+    var url = document.URL;
+    var target = e.target || e.currentTarget;
+    var time = Date.now();
+    var event = e.type;
+    chrome.runtime.sendMessage({'type': "interaction", 
+                                'event': {
+                                   'event':event, 
+                                   'url':url, 
+                                   'target':target,
+                                   'extra':extra
+                                  }});
 }

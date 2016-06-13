@@ -5,8 +5,10 @@ var session = new Session();
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     // Logs when user clicks a link
-    if (request.type == "link-hit") {
-        session.addLinkHit(request.hit);
+    if (request.type == "linkClick") {
+        session.addLinkHit(request.event);
+    } else if (request.type == "interaction") {
+        session.addInteraction(request.event);
     }
 });
 
