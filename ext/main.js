@@ -54,8 +54,10 @@ chrome.history.onVisited.addListener (function (historyItem) {
               }
           }
           // fixing relative paths
-          if (srcURL.indexOf('http') < 0)
+          if (srcURL.indexOf('http') < 0) {
+              console.log('fixing url');
               srcURL = url + srcURL;
+          }
           var pv = new PageVisit(visit.id, userID, tabID, windowID, srcID,
                                  srcURL, url, visit.visitTime, visit.transition);
           session.addVisit(pv);
