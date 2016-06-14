@@ -25,13 +25,13 @@ function logLinkClicked (tgt) {
     var to = tgt.getAttribute("href")
     var time = Date.now();
     // fixing relative paths
-    if (to.indexOf('http') < 0) {
-        if (to[0] == '/') {
+    if (to.indexOf('http') != 0) {
+        if (to[0] == '/' && from[from.length - 1] == '/') {
             to = from + to.slice(1,to.length);
         }
         to = from + to;
     }
-    chrome.runtime.sendMessage({type: "linkClick", 
+    chrome.runtime.sendMessage({type: "capture-links", 
                                 event: {'from':from, 'to':to, 'time':time}});
 }
 
@@ -40,7 +40,7 @@ function logInteraction (e) {
     var target = e.target || e.currentTarget;
     var time = Date.now();
     var event = e.type;
-    chrome.runtime.sendMessage({'type': "interaction", 
+    chrome.runtime.sendMessage({'type': "capture-interactions", 
                                 'event': {
                                    'event':event, 
                                    'url':url, 

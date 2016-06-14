@@ -5,29 +5,27 @@ function Session() {
     this.init();
 }
 
-session.prototype.init = function () {
+Session.prototype.init = function () {
     this.MAX_PAGEVISITS = 50;
     this.MAX_LINKCLICKS = 50;
     this.MAX_INTERACTIONS = 50;
     this.clearLogs();
-    chrome.identity.getProfileUserInfo.bind(this, function (info) {
-        this.userID = info.id;
-    });
+    chrome.identity.getProfileUserInfo.call(this, info => this.userID = info.id);
 }
 
-session.prototype.clearLogs = function () {
+Session.prototype.clearLogs = function () {
     this.pageVisits = [];
     this.linksClicked = [];
     this.interactions = [];
     this._captures = {
-       'link': {'type':'link','MAX': this.MAX_LINKCLICKS, 'fails':0, 'log': []},
+       'links': {'type':'links','MAX': this.MAX_LINKCLICKS, 'fails':0, 'log': []},
        'pages': {'type':'pages', 'MAX': this.MAX_PAGEVISITS, 'fails':0, 'log': []},
-        'interactions': {'type':'ineractions','MAX': this.MAX_INTERACTIONS, 'fails':0, 'log': []}
+        'interactions': {'type':'interactions','MAX': this.MAX_INTERACTIONS, 'fails':0, 'log': []}
     };
 }
 
-session.prototype.capture(type, e) {
-    var c = this._capture[type];
+Session.prototype.capture = function (type, e) {
+    var c = this._captures[type];
     e['userID'] = this.userID;
     c.log.push(e);
     if (c.log.length > c.MAX * (c.fails + 1)) {
@@ -52,9 +50,10 @@ Session.prototype.sendJSON = function (type, data) {
 
 // dumps all data to server
 Session.prototype.unload = function () {
-    Object.values(this._capture).forEach(function (c) {
+    var send = this.sendJSON;
+    Object.values(this._captures).forEach(function (c) {
        if (c.log.length > 0) {
-           this.sendJSON(c.type, c.log);
+           send(c.type, c.log);
            c.log = [];
        }
     });

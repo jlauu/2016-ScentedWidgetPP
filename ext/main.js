@@ -5,10 +5,9 @@ var session = new Session();
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     // Logs when user clicks a link
-    if (request.type == "linkClick") {
-        session.addLinkHit(request.event);
-    } else if (request.type == "interaction") {
-        session.addInteraction(request.event);
+    if (request.type.includes("capture-")) {
+        var type = request.type.substr("capture-".length);
+        session.capture(type, request.event);
     }
 });
 
@@ -61,7 +60,7 @@ chrome.history.onVisited.addListener (function (historyItem) {
           }
           var pv = new PageVisit(visit.id, userID, tabID, windowID, srcID,
                                  srcURL, url, visit.visitTime, visit.transition);
-          session.addVisit(pv);
+          session.capture('pages', pv);
         });
     }
 });
