@@ -7,6 +7,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     // Logs when user clicks a link
     if (request.type.includes("capture-")) {
         var type = request.type.substr("capture-".length);
+        console.log(request);
         session.capture(type, request.event);
     }
 });
