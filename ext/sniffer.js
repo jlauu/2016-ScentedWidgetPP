@@ -4,20 +4,20 @@
 
 document.addEventListener('click', mouseHandler, false);
 document.addEventListener('dblclick', mouseHandler, false);
-document.addEventListener('scroll', logInteraction, false);
-document.addEventListener('wheel', logInteraction, false);
-document.addEventListener('change', logInteraction, false);
-document.addEventListener('input', logInteraction, false);
+/*document.addEventListener('scroll', logInteraction, false);*/
+/*document.addEventListener('wheel', logInteraction, false);*/
+/*document.addEventListener('change', logInteraction, false);*/
+/*document.addEventListener('input', logInteraction, false);*/
 
 function mouseHandler (e) {
     var e = window.e || e;
     if (e.target.tagName == 'A') {
         logLinkClicked(e.target);
     } else if (e.currentTarget.tagName == 'A') {
-        logLinkClicked(e.currentTarget);
+        logLinkClicked(e);
     }
 
-    logInteraction(e, null);
+    logInteraction(e);
 }
 
 function logLinkClicked (tgt) {
@@ -37,14 +37,14 @@ function logLinkClicked (tgt) {
 
 function logInteraction (e) {
     var url = document.URL;
-    var target = e.target || e.currentTarget;
+    var target = e.currentTarget;
     var time = Date.now();
     var event = e.type;
     chrome.runtime.sendMessage({'type': "capture-interactions", 
                                 'event': {
-                                   'event':event, 
-                                   'url':url, 
-                                   'target':target,
-                                   'extra':extra
+                                   'event': event, 
+                                   'url': url, 
+                                   'target': target,
+                                   'time' : time
                                   }});
 }

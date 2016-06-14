@@ -26,7 +26,7 @@ Session.prototype.clearLogs = function () {
 
 Session.prototype.capture = function (type, e) {
     var c = this._captures[type];
-    e['userID'] = this.userID;
+    e['userID'] = this.userID ? this.userID : "";
     c.log.push(e);
     if (c.log.length > c.MAX * (c.fails + 1)) {
         this.sendJSON(type, c.log);
