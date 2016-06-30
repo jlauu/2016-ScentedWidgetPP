@@ -10,6 +10,7 @@ Session.prototype.init = function () {
     this.MAX_LINKCLICKS = 50;
     this.MAX_INTERACTIONS = 50;
     this.clearLogs();
+    this.webhost = "swpp-server-stage.herokuapp.com";
     chrome.identity.getProfileUserInfo.call(this, info => this.userID = info.id);
 }
 
@@ -38,7 +39,7 @@ Session.prototype.capture = function (type, e) {
 Session.prototype.sendJSON = function (type, data) {
     var xhr = new XMLHttpRequest();
     var json = JSON.stringify({'type':type, 'data':data});
-    xhr.open("POST", 'https://swpp-server-stage.herokuapp.com/send', true);
+    xhr.open("POST", 'https' + this.webhost + '/send', true);
     xhr.setRequestHeader("Content-type", "application/json");
     xhr.onreadystatechange = function () {
         if (xhr.readyState == 4 && xhr.status == 200) {

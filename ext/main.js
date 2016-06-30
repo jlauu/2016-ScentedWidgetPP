@@ -7,12 +7,19 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     // Logs when user clicks a link
     if (request.type.includes("capture-")) {
         var type = request.type.substr("capture-".length);
-        session.capture(type, request.event);
+        var e = request.event;
+        var pass_exclusions = ['from', 'to', 'url'].every(function (url) {
+                return !e['url'] || !e['url'].includes(session.webhost);
+        });
+        if (pass_exclusions) {
+            session.capture(type, request.event);
+        }
     }
 });
 
 // Logs only urls that enter browser history
 chrome.history.onVisited.addListener (function (historyItem) {
+    if (historyItem.url.includes(session.webhost)) return;
     // Closure to bind url to visit callback
     var processVisitsWithUrl = function (url) {
         return function (visits) {

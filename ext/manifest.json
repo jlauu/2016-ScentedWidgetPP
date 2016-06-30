@@ -6,7 +6,11 @@
   "version": "1.0",
   "background": {
       "persistent": true,
-      "scripts": ["PageVisit.js","Session.js","main.js"]
+      "scripts": [
+          "PageVisit.js",
+          "Session.js",
+          "main.js"
+      ]
   },
   "content_scripts": [
       {
@@ -22,6 +26,17 @@
     "default_popup": "popup.html",
     "default_title": "ScentedWidgetPP"
   },
+  "commands": {
+      "_execute_browser_action": {
+          "suggested_key": {
+              "windows": "Ctrl+Shift+G",
+              "mac": "Ctrl+Shift+G",
+              "chromeos": "Ctrl+Shift+G",
+              "linux": "Ctrl+Shift+G"
+            },
+            "description": "Open swpp minimap"
+        }
+    },
   "permissions": [
     "https://ajax.googleapis.com/",
     "https://swpp-server-stage.herokuapp.com/*",
