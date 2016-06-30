@@ -10,6 +10,13 @@
    /*document.addEventListener('scroll', logInteraction, false);*/
    /*document.addEventListener('wheel', logInteraction, false);*/
    /*document.addEventListener('change', logInteraction, false);*/
+
+   // http://stackoverflow.com/questions/14780350/convert-relative-path-to-absolute-using-javascript
+   function absolutePath = function (href) {
+        var link = document.createElement("a");
+        link.href = href;
+        return (link.protocol+"//"+link.host+link.pathname+link.search+link.hash);
+   }
    
    function mouseHandler (e) {
        var e = window.e || e;
@@ -24,15 +31,9 @@
    
    function logLinkClicked (tgt) {
        var from = document.URL;
-       var to = tgt.getAttribute("href")
+       var to = absolutePath(tgt.getAttribute("href"))
        var time = Date.now();
-       // fixing relative paths
-       if (to.indexOf('http') != 0) {
-           if (to[0] == '/' && from[from.length - 1] == '/') {
-               to = from + to.slice(1,to.length);
-           }
-           to = from + to;
-       }
+       // fixing relative paths    
        chrome.runtime.sendMessage({type: "capture-links", 
                                    event: {'from':from, 'to':to, 'time':time}});
        last_event = "capture-links";
