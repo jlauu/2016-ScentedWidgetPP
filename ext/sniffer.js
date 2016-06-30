@@ -12,7 +12,7 @@
    /*document.addEventListener('change', logInteraction, false);*/
 
    // http://stackoverflow.com/questions/14780350/convert-relative-path-to-absolute-using-javascript
-   function absolutePath = function (href) {
+   function absolutePath (href) {
         var link = document.createElement("a");
         link.href = href;
         return (link.protocol+"//"+link.host+link.pathname+link.search+link.hash);
