@@ -15,7 +15,7 @@ function init() {
                         'active': true,
                         'currentWindow': true
                     }, function (tabs) {
-                        MiniSWPP.init(tabs[0].url, json);
+                        MiniSWPP.init(tabs[0], json);
                     });
 /*                    chrome.storage.sync.set({'swpp_graph':json}, function () {*/
 /*                        console.log("graph stored");*/
@@ -39,6 +39,7 @@ var MiniSWPP = (function () {
         links: [],
         nodes: [],
     };
+    var tab;
 
     function resize() {
         swpp.width = window.innerWidth;
@@ -99,7 +100,9 @@ var MiniSWPP = (function () {
         return {'nodes':nodes, 'links':links, 'groups':[group_id]};
     }
 
-    swpp.init = function (url, json) {
+    swpp.init = function (current_tab, json) {
+        var url = current_tab.url;
+        tab = current_tab;
         var width = swpp.width;
         var height = swpp.height;
 
@@ -144,7 +147,7 @@ var MiniSWPP = (function () {
             .attr("markerHeight", 6)
             .attr("orient", "auto")
           .append("svg:path")
-            .attr("d", "M0, 0L0,0L0,5");
+            .attr("d", "M0, -5L10,0L0,5");
 
         // add the links and the arrows
         var path = svg.append("svg:g").selectAll("path")
@@ -165,8 +168,10 @@ var MiniSWPP = (function () {
             })
             .call(force.drag)
             .on("dblclick", function (d) {
-                var win = window.open(d.url, '_blank');
-                win.focus();
+                  chrome.tabs.update({url: d.url});
+                  var old = swpp.nodes.find(function (d) {return d.focus;});
+                  if (old) old.focus = false;
+                  d.focus = true;
             });
 
         nodes.append("circle")
