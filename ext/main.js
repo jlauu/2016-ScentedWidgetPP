@@ -1,8 +1,7 @@
 // main.js: top-level script that runs in background page
 'use strict';
 
-var session = new Session();
-
+var session = Session.getInstance();
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     // Logs when user clicks a link
     if (request.type.includes("capture-")) {
