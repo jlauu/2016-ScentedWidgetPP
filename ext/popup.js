@@ -56,6 +56,15 @@ var app;
                 });
                 return graph;
             }
+            // set custom event handlers
+            SWPPGraph.prototype.postStart = function () {
+                this.nodes.on("dblclick", function (d) {
+                    chrome.tabs.update({url: d.url});
+                    var old = instance.nodes.find(function (d) {return d.focus;});
+                    if (old) old.focus = false;
+                    d.focus = true;
+                });
+            }
     }
     return {
         extension: extension
@@ -140,7 +149,11 @@ var app;
             this.force
                 .on("tick", this.tick())
                 .start();
+            this.postStart();
         }
+        
+        SWPPGraph.prototype.postStart = function () {};
+
         // Update point and edge positons
         SWPPGraph.prototype.tick = function (e) {
             var path = this.path;
