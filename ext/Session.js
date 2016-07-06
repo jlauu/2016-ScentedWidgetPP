@@ -3,15 +3,22 @@
 
 var Session = (function (url) {
     var instance;
+    var capture_types = ['links','pages','interactions']
+    var INIT_MAX = 50;
+
+    function mkCapture(type) {
+        var c = {}
+        c[type] = {'type': type, 'MAX': INIT_MAX, 'fails':0, 'log':[]};
+        return c
+    }
 
     function init() {
         var max = 50
         var id = -1;
-        var _captures = {
-            'links': {'type':'links','MAX': max, 'fails':0, 'log': []},
-            'pages': {'type':'pages','MAX': max, 'fails':0, 'log': []},
-            'interactions': {'type':'interactions','MAX': max, 'fails':0, 'log': []}
-        };
+        var _captures = {}
+        capture_types.forEach(function (type) {
+            _captures[type] = mkCapture(type);
+        });
         return {
             MAX_PAGEVISITS: max,
             MAX_LINKCLICKS: max,
@@ -19,26 +26,9 @@ var Session = (function (url) {
             webhost: url,
             userID: id,
             clearLogs: function () {
-                _captures = {
-                   'links': {
-                       'type':'links',
-                       'MAX': this.MAX_LINKCLICKS,
-                       'fails':0, 
-                       'log': []
-                   },
-                   'pages': {
-                       'type':'pages',
-                       'MAX': this.MAX_PAGEVISITS,
-                       'fails':0,
-                       'log': []
-                   },
-                   'interactions': {
-                       'type':'interactions',
-                       'MAX': this.MAX_INTERACTIONS,
-                       'fails':0,
-                       'log':[]
-                   }
-                };
+                Object.values(_captures).forEach(function (c) {
+                    c.log = [];
+                });
             },
             capture: function (type, e) {
                 var c = _captures[type];
