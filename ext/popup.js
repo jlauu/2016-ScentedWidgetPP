@@ -43,6 +43,9 @@ function fetchData (callback) {
 function startGraph() {
     chrome.tabs.query({'active': true,'currentWindow': true}, function (tabs) {
         config.tab = tabs[0];
+        d3.selectAll('body, html')
+            .style("width", 600)
+            .style("height", 500);
         var minimap = MiniSWPP.getInstance(config);
         minimap.start();
     });
@@ -148,8 +151,9 @@ var MiniSWPP = (function () {
                 .attr("preserveAspectRatio", "xMinYMin meet")
                 .classed("svg-content-responsive", true);
             this.resize()
+            var swpp = this;
             d3.select(window).on('resize', function () {
-                this.resize();
+                swpp.resize();
             });
             this.data = config.json;
             this.graph = this.preprocess(config);
@@ -204,6 +208,7 @@ var MiniSWPP = (function () {
         SWPPGraph.prototype.tick = function (e) {
             var path = this.path;
             var nodes = this.nodes;
+            var swpp = this;
             return function (e) {
                 path.attr("d", function(d) {
                     var dx = d.target.x - d.source.x,
