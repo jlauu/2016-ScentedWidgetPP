@@ -1,12 +1,55 @@
 'use strict';
-var app;
-(function () {
-    var minimap;
-    var config = {
-        node_style_fill: function (d) {return d.focus ? 2 : 1;},
-        node_attr_r: 5,
-    };
-    // Extensions
+
+// layout and display configuration
+var config = {
+    node_style_fill: function (d) {return d.focus ? 2 : 1;},
+    node_attr_r: 5,
+};
+
+function main () {
+    fetchData(startGraph);
+}
+
+function saveJSON (json) {
+    chrome.storage.local.set({"swpp_data": json}, function () {
+        console.log("success");
+    });
+}
+
+// Gets json data from server or storage and applies changes to config
+function fetchData (callback) {
+    chrome.storage.local.get("swpp_data", function (items) {
+        if (items.swpp_data) {
+            console.log("fetching from sync...");
+            config.json = items.swpp_data;
+            callback();
+        } else {
+            console.log("fetching from server...");
+            var xhr = new XMLHttpRequest();
+            var userid = chrome.extension.getBackgroundPage().session.userID;
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    config.json = JSON.parse(xhr.responseText);
+                    saveJSON (config.json);
+                    callback();
+                }
+            }
+            xhr.open("GET", "https://swpp-server-stage.herokuapp.com/?uid="+userid, true);
+            xhr.send();
+        }
+    });
+}
+
+function startGraph() {
+    chrome.tabs.query({'active': true,'currentWindow': true}, function (tabs) {
+        config.tab = tabs[0];
+        var minimap = MiniSWPP.getInstance(config);
+        minimap.start();
+    });
+}
+
+var MiniSWPP = (function () {
+    // Popup version extensions with labelling and editing
    var mixin = (function() {
        function eqURL (url_a, url_b) {
            var parser = document.createElement('a');
@@ -16,7 +59,9 @@ var app;
            url_b = parser.href;
            return url_a == url_b;
        }
-       function extension(SWPPGraph) {
+
+       // Extend the base graph prototype. Called by the base interface
+       function applyExtension(SWPPGraph) {
             SWPPGraph.prototype.preprocess = function (config) {
                 var graph = {nodes:[], links:[], groups:[]};
                 var url = config.tab.url;
@@ -46,7 +91,8 @@ var app;
                     var targetNode = config.json.nodes.find(function (n) {
                         return n.id === e.target;
                     });
-                    if (sourceNode.group == group_id || targetNode.group == group_id) {
+                    if (sourceNode.group == group_id || 
+                        targetNode.group == group_id) {
                         graph.links.push({
                             source: sourceNode,
                             target: targetNode,
@@ -67,12 +113,12 @@ var app;
             }
     }
     return {
-        extension: extension
+        applyExtension: applyExtension
     };
    })();
 
-    // Minimap: navigation and graph labelling/editing
-    var SWPP = (function (mixin) {
+    // Base graph interface
+    var ExtendedSWPP = (function (mixin) {
         var instance;
 
         function SWPPGraph(config) {
@@ -206,13 +252,14 @@ var app;
             });
             return graph;
         }
-
+        
+        // Apply mixins to the singleton prototype
         if (mixin) {
-            if (mixin.extension) {
-                mixin.extension(SWPPGraph);
+            if (mixin.applyExtension) {
+                mixin.applyExtension(SWPPGraph);
             }
         }
-                   
+        
         return {
             getInstance: function (config) {
                 if (!instance) {
@@ -223,29 +270,10 @@ var app;
        };
     })(mixin);
 
-    // Pull graph data from local/sync storage, else fetch from webhost
-    chrome.storage.sync.get('swpp_graph', function (o) {
-        var xhr = new XMLHttpRequest();
-        var userid = chrome.extension.getBackgroundPage().session.userID;
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4 && xhr.status == 200) {
-                var json = JSON.parse(xhr.responseText);
-                chrome.tabs.query({
-                    'active': true,
-                    'currentWindow': true
-                }, function (tabs) {
-                    config.json = json;
-                    config.tab = tabs[0];
-                    minimap = SWPP.getInstance(config);
-                    minimap.start();
-                    app = minimap;
-                });
-/*                    chrome.storage.sync.set({'swpp_graph':json}, function () {*/
-/*                        console.log("graph stored");*/
-/*                    });*/
-            }
-        }
-        xhr.open("GET", "https://swpp-server-stage.herokuapp.com/?uid="+userid, true);
-        xhr.send();
-    });
+    // Return the extended graph interface
+    return {
+        getInstance: ExtendedSWPP.getInstance
+    };
 })();
+    
+main();
