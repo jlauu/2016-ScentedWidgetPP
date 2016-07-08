@@ -2,10 +2,11 @@
 'use strict';
 
 // TODO: application-wide single-point-of-truth for types of items to be logged?
-var Session = (function (url) {
+var Session = (function () {
     var instance;
     var INIT_MAX = 50;
     var userID;
+    var webhost = 'swpp-server-stage.herokuapp.com';
 
     // Maintains a log and metadata for one type of event
     function Capture(type) {
@@ -50,7 +51,7 @@ var Session = (function (url) {
         function sendJSON (type, data) {
             var xhr = new XMLHttpRequest();
             var json = JSON.stringify({'type':type, 'data':data});
-            xhr.open("POST", 'https' + webhost + '/send', true);
+            xhr.open("POST", 'https://' + webhost + '/send', true);
             xhr.setRequestHeader("Content-type", "application/json");
             xhr.onreadystatechange = function () {
                 if (xhr.readyState == 4 && xhr.status == 200) {
@@ -102,7 +103,7 @@ var Session = (function (url) {
             MAX_PAGEVISITS: max,
             MAX_LINKCLICKS: max,
             MAX_INTERACTIONS: max,
-            webhost: url,
+            webhost: webhost,
             registerWindow: registerWindow,   
             registerTab: registerTab,
             clusterOfWindow: clusterOfWindow,
@@ -123,4 +124,4 @@ var Session = (function (url) {
             return instance;
         }
     };
-})('swpp-server-stage.herokuapp.com');
+})();
