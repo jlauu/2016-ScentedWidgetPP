@@ -3,7 +3,7 @@
 var ClusterManager = (function () {
     var instance;
     var QUERY_MSG_NAME = 'cluster_query';
-
+    var NEW_MESSAGE_NAME = 'cluster_new';
     function init(id) {
         var userid = id;
         var clusters = {};
@@ -26,6 +26,8 @@ var ClusterManager = (function () {
             var cluster = new UserCluster(name, [], null); 
             cluster.addUrl(url);
             clusters[name] = cluster;
+            console.log(cluster);
+            return cluster;
         }
 
         function get(name) {
@@ -46,7 +48,8 @@ var ClusterManager = (function () {
 
         function getClustersByUrl(url) {
             var results = [];
-            for (var c in clusters) {
+            for (var k in clusters) {
+                var c = clusters[k];
                 if (c.hasUrl(url)) {
                     results.push(c);
                 }
@@ -55,6 +58,7 @@ var ClusterManager = (function () {
         }
         return {
             query_message_name: QUERY_MSG_NAME,
+            new_message_name : NEW_MESSAGE_NAME,
             mkCluster: mkCluster,
             addToCluster : addToCluster,
             get : get,

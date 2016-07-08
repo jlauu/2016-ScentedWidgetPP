@@ -18,7 +18,14 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     // Handle queries to cluster manager
     } else if (request.type == clusters.query_message_name) {
         var results = clusters.getClustersByUrl(request.url);
-        sendResponse({clusters: results});
+        results.map(function (c) {return c.toJSON();});
+        sendResponse({jsons: results});
+    } else if (request.type == clusters.new_message_name) {
+        var c = clusters.mkCluster(null, request.url);
+        console.log(c);
+        var json = c.toJSON();
+        console.log(json);
+        sendResponse({json: json});
     }
 });
 

@@ -16,6 +16,10 @@ function UserCluster(name, keywords, graph) {
     this.hasUrl = function (url) {
         return this.graph.urls.has(url);
     }
+
+    this.toJSON = function () {
+        return this.graph.toJSON();
+    }
 }
 
 

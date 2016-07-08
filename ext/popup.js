@@ -5,8 +5,10 @@ var config = {
     node_style_fill: function (d) {return d.focus ? 2 : 1;},
     node_attr_r: 5,
     tabs: null,
-    json: null // use fetchData
+    json: null, // use fetchData
 };
+
+var app;
 
 function main () {
     // Get current tab url
@@ -15,9 +17,9 @@ function main () {
             var url = tabs[0].url;
             config.url = url;
             chrome.runtime.sendMessage({type: 'cluster_query', url: url}, function (response) {
-                console.log("query", response);
-                if (response.clusters && response.clusters.length > 0) {
-                    // TODO: Display clusters
+                if (response.jsons && response.jsons.length > 0) {
+                    config.json = response.jsons[0];
+                    drawGraph();
                 } else {
                     promptNewCluster();
                 }
@@ -26,12 +28,33 @@ function main () {
     });
 }
 
+function setPopupSize(w, h) {
+    d3.select('html','body')
+        .style('width', w)
+        .style('height', h)
+}
+
 function promptNewCluster() {
-    console.log("new cluster");
-    d3.select('html body')
-        .style('width', 200)
-        .style('height', 135)
-      .text('New Cluster');
+    setPopupSize(150,300);
+    d3.select('body').append('div')
+        .attr('id', 'create-cluster')
+        .text('Create Cluster')
+        .on("click", function() {
+            chrome.runtime.sendMessage({type : 'cluster_new', url : config.url},
+                                        function (response) {
+                d3.select('#create-cluster').remove();
+                config.json = response.json;
+                setPopupSize(600,500);
+                drawGraph();
+            });
+        });
+}
+
+function drawGraph() {
+    console.log(config);
+    var minimap = MiniSWPP.getInstance(config);
+    minimap.start();
+    app = minimap;
 }
 
 var MiniSWPP = (function () {
@@ -48,55 +71,55 @@ var MiniSWPP = (function () {
 
        // Extend the base graph prototype. Called by the base interface
        function applyExtension(SWPPGraph) {
-            SWPPGraph.prototype.preprocess = function (config) {
-                var graph = {nodes:[], links:[], groups:[]};
-                var url = config.tab.url;
-                // Find the node for the url of the tab we are in
-                var node = config.json.nodes.find(function (n) {
-                    return eqURL(n.url, url);
-                });
-                if (!node) return graph;
-                var group_id = node.group;
-                graph.groups.push(group_id);
-                // Build nodes array
-                config.json.nodes.forEach(function (n) {
-                    if (n.group == group_id) {
-                        // If it is the same node as the s
-                        if (eqURL(url, n.url)) {
-                            n.focus = true;
-                        } else {
-                            n.focus = false;
-                        } graph.nodes.push(n);
-                    }
-                });
-                // Build links array
-                config.json.links.forEach(function (e) {
-                    var sourceNode = config.json.nodes.find(function (n) {
-                        return n.id === e.source;
-                    });
-                    var targetNode = config.json.nodes.find(function (n) {
-                        return n.id === e.target;
-                    });
-                    if (sourceNode.group == group_id || 
-                        targetNode.group == group_id) {
-                        graph.links.push({
-                            source: sourceNode,
-                            target: targetNode,
-                            value: e.value
-                        });
-                    }
-                });
-                return graph;
-            }
+//            SWPPGraph.prototype.preprocess = function (config) {
+//                var graph = {nodes:[], links:[], groups:[]};
+//                var url = config.tab.url;
+//                // Find the node for the url of the tab we are in
+//                var node = config.json.nodes.find(function (n) {
+//                    return eqURL(n.url, url);
+//                });
+//                if (!node) return graph;
+//                var group_id = node.group;
+//                graph.groups.push(group_id);
+//                // Build nodes array
+//                config.json.nodes.forEach(function (n) {
+//                    if (n.group == group_id) {
+//                        // If it is the same node as the s
+//                        if (eqURL(url, n.url)) {
+//                            n.focus = true;
+//                        } else {
+//                            n.focus = false;
+//                        } graph.nodes.push(n);
+//                    }
+//                });
+//                // Build links array
+//                config.json.links.forEach(function (e) {
+//                    var sourceNode = config.json.nodes.find(function (n) {
+//                        return n.id === e.source;
+//                    });
+//                    var targetNode = config.json.nodes.find(function (n) {
+//                        return n.id === e.target;
+//                    });
+//                    if (sourceNode.group == group_id || 
+//                        targetNode.group == group_id) {
+//                        graph.links.push({
+//                            source: sourceNode,
+//                            target: targetNode,
+//                            value: e.value
+//                        });
+//                    }
+//                });
+//                return graph;
+//            }
             // set custom event handlers
-            SWPPGraph.prototype.postStart = function () {
-                this.nodes.on("dblclick", function (d) {
-                    chrome.tabs.update({url: d.url});
-                    var old = instance.nodes.find(function (d) {return d.focus;});
-                    if (old) old.focus = false;
-                    d.focus = true;
-                });
-            }
+//            SWPPGraph.prototype.postStart = function () {
+//                this.nodes.on("dblclick", function (d) {
+//                    chrome.tabs.update({url: d.url});
+//                    var old = instance.nodes.find(function (d) {return d.focus;});
+//                    if (old) old.focus = false;
+//                    d.focus = true;
+//                });
+//            }
     }
     return {
         applyExtension: applyExtension

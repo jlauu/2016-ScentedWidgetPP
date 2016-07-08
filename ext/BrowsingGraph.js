@@ -13,8 +13,8 @@ function BrowsingGraph() {
     }
 
     this.addNode = function(url) {
-        if (!urls.has(url)) {
-            urls.add(url);
+        if (!this.urls.has(url)) {
+            this.urls.add(url);
             _d3nodes.push({'url' : url, 'id' : id++, group : [0]});
         }
     }
