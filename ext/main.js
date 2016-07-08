@@ -3,8 +3,15 @@
 
 var session = Session.getInstance();
 var clusters = ClusterManager.getInstance();
+
+// Window/Tab Event Capturing Listeners
+chrome.tabs.onCreated.addListener(session.registerTab);
+
+chrome.windows.onCreated.addListener(session.registerWindow);
+
+// Browsing Event Capturing Listeners
+
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    console.log(request.type);
     // Logs when user clicks a link
     if (request.type.includes(session.capture_message_name)) {
         var type = request.type.substr(session.capture_message_name.length);
@@ -20,12 +27,17 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         var results = clusters.getClustersByUrl(request.url);
         results.map(function (c) {return c.toJSON();});
         sendResponse({jsons: results});
+    // Request a new cluster
     } else if (request.type == clusters.new_message_name) {
         var c = clusters.mkCluster(null, request.url);
-        console.log(c);
         var json = c.toJSON();
-        console.log(json);
         sendResponse({json: json});
+    // Register tab or window with cluster
+    } else if (request.type == session.register_message_name) {
+        var tab = request.tab;
+        var w = request.window;
+        if (tab) session.registerTab(tab, request.cluster_id);
+        if (w) session.registerWindow(w, request.cluster_id);
     }
 });
 

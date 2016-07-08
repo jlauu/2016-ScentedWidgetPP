@@ -58,17 +58,17 @@ var ClusterManager = (function () {
         }
         return {
             query_message_name: QUERY_MSG_NAME,
-            new_message_name : NEW_MESSAGE_NAME,
+            new_message_name: NEW_MESSAGE_NAME,
             mkCluster: mkCluster,
-            addToCluster : addToCluster,
-            get : get,
-            getClusters : getClusters,
-            getClustersByUrl : getClustersByUrl
+            addToCluster: addToCluster,
+            get: get,
+            getClusters: getClusters,
+            getClustersByUrl: getClustersByUrl
         }
     }
 
     return {
-        getInstance : function(userid) {
+        getInstance: function(userid) {
             if (!instance) {
                 instance = init(userid);
             }

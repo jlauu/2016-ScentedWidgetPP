@@ -8,13 +8,12 @@ var config = {
     json: null, // use fetchData
 };
 
-var app;
-
 function main () {
     // Get current tab url
     chrome.tabs.query({'active': true, 'currentWindow': true}, function (tabs) {
         if (tabs.length >= 0 && tabs[0].url) {
             var url = tabs[0].url;
+            config.tabs = tabs[0];
             config.url = url;
             chrome.runtime.sendMessage({type: 'cluster_query', url: url}, function (response) {
                 if (response.jsons && response.jsons.length > 0) {
@@ -40,21 +39,20 @@ function promptNewCluster() {
         .attr('id', 'create-cluster')
         .text('Create Cluster')
         .on("click", function() {
-            chrome.runtime.sendMessage({type : 'cluster_new', url : config.url},
-                                        function (response) {
-                d3.select('#create-cluster').remove();
-                config.json = response.json;
-                setPopupSize(600,500);
-                drawGraph();
-            });
+            chrome.runtime.sendMessage({type: 'cluster_new', url: config.url}, 
+                function (response) {
+                    d3.select('#create-cluster').remove();
+                    chrome.runtime.sendMessage({type:'register', tab: config.tab});
+                    config.json = response.json;
+                    setPopupSize(600,500);
+                    drawGraph();
+                });
         });
 }
 
 function drawGraph() {
-    console.log(config);
     var minimap = MiniSWPP.getInstance(config);
     minimap.start();
-    app = minimap;
 }
 
 var MiniSWPP = (function () {

@@ -5,9 +5,10 @@
 var Session = (function (url) {
     var instance;
     var CAPTURE_MSG_PREFIX = 'capture-';
-    var capture_types = ['links','pages','interactions']
+    var REGISTER_MSG = 'register';
+    var capture_types = ['links','pages','interactions'];
     var INIT_MAX = 50;
-    var _captures = {}
+    var _captures = {};
 
     // Maintains a log and metadata for one type of event
     function Capture(type) {
@@ -18,13 +19,19 @@ var Session = (function (url) {
     }
 
     function init() {
-        var max = 50
+        var max = 50;
         var id = -1;
+        var tabClusters = {};
+        var windowClusters = {};
+        
         capture_types.forEach(function (type) {
             _captures[type] = new Capture(type);
         });
+            
+        
         return {
             capture_message_name: CAPTURE_MSG_PREFIX,
+            register_message_name: REGISTER_MSG,
             MAX_PAGEVISITS: max,
             MAX_LINKCLICKS: max,
             MAX_INTERACTIONS: max,
@@ -61,13 +68,41 @@ var Session = (function (url) {
             // Sends all logged data to the server
             unload: function () {
                 var send = this.sendJSON;
-                Object.values(_captures).forEach(function (c) {
+                Object.keys(_captures).forEach(function (k) {
+                   var c = _captures[k];
                    if (c.log.length > 0) {
                        send(c.type, c.log);
                        c.log = [];
                    }
                 });
-            }
+            },
+            clusterOfTab: function(tab_id) {
+                return tabClusters[tab_id];
+            },
+            clusterOfWindow: function(window_id) {
+                return windowClusters[window_id];
+            },
+            registerTab: function(tab, cluster_id) {
+                if (cluster_id) {
+                    tabClusters[tab.id] = cluster_id;
+                } else if (this.clusterOfTab(tab.openerTabId)) {
+                    tabClusters[tab.id] = this.clusterOfTab(tab.openerTabId);
+                } else if (this.clusterOfWindow(tab.windowId)) {
+                    tabClusters[tab.id] = this.clusterOfWindow(tab.windowId);
+                } else {
+                    tabClusters[tab.id] = null;
+                }
+
+            },
+            registerWindow: function (w, cluster_id) {   
+                if (w.type && w.type != 'normal') return;
+                if (cluster_id) {
+                    windowClusters[w.id] = cluster_id;
+                } else {
+                    windowClusters[w.id] = null;
+                }
+            } 
+
         };
     }
     return {
