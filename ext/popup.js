@@ -56,74 +56,6 @@ function drawGraph() {
 }
 
 var MiniSWPP = (function () {
-    // Popup version extensions with labelling and editing
-   var mixin = (function() {
-       function eqURL (url_a, url_b) {
-           var parser = document.createElement('a');
-           parser.href = url_a;
-           url_a = parser.href;
-           parser.href = url_b;
-           url_b = parser.href;
-           return url_a == url_b;
-       }
-
-       // Extend the base graph prototype. Called by the base interface
-       function applyExtension(SWPPGraph) {
-//            SWPPGraph.prototype.preprocess = function (config) {
-//                var graph = {nodes:[], links:[], groups:[]};
-//                var url = config.tab.url;
-//                // Find the node for the url of the tab we are in
-//                var node = config.json.nodes.find(function (n) {
-//                    return eqURL(n.url, url);
-//                });
-//                if (!node) return graph;
-//                var group_id = node.group;
-//                graph.groups.push(group_id);
-//                // Build nodes array
-//                config.json.nodes.forEach(function (n) {
-//                    if (n.group == group_id) {
-//                        // If it is the same node as the s
-//                        if (eqURL(url, n.url)) {
-//                            n.focus = true;
-//                        } else {
-//                            n.focus = false;
-//                        } graph.nodes.push(n);
-//                    }
-//                });
-//                // Build links array
-//                config.json.links.forEach(function (e) {
-//                    var sourceNode = config.json.nodes.find(function (n) {
-//                        return n.id === e.source;
-//                    });
-//                    var targetNode = config.json.nodes.find(function (n) {
-//                        return n.id === e.target;
-//                    });
-//                    if (sourceNode.group == group_id || 
-//                        targetNode.group == group_id) {
-//                        graph.links.push({
-//                            source: sourceNode,
-//                            target: targetNode,
-//                            value: e.value
-//                        });
-//                    }
-//                });
-//                return graph;
-//            }
-            // set custom event handlers
-//            SWPPGraph.prototype.postStart = function () {
-//                this.nodes.on("dblclick", function (d) {
-//                    chrome.tabs.update({url: d.url});
-//                    var old = instance.nodes.find(function (d) {return d.focus;});
-//                    if (old) old.focus = false;
-//                    d.focus = true;
-//                });
-//            }
-    }
-    return {
-        applyExtension: applyExtension
-    };
-   })();
-
     // Base graph interface
     var ExtendedSWPP = (function (mixin) {
         var instance;
@@ -277,7 +209,7 @@ var MiniSWPP = (function () {
                 return instance;
             }
        };
-    })(mixin);
+    })({});
 
     // Return the extended graph interface
     return {

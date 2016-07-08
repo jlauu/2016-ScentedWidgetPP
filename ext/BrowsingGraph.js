@@ -15,13 +15,16 @@ function BrowsingGraph() {
     this.addNode = function(url) {
         if (!this.urls.has(url)) {
             this.urls.add(url);
-            _d3nodes.push({'url' : url, 'id' : id++, group : [0]});
+            this.nodes[url] = id;
+            _d3nodes.push({'url' : url, 'id' : id, group : [0]});
+            id++;
         }
     }
 
     this.addLink = function(url_from, url_to) {
         this.addNode(url_from);
         this.addNode(url_to);
+        console.log(this.nodes);
         var src = this.nodes[url_from];
         var dest = this.nodes[url_to];
         if (!this.adj[src]) {
@@ -29,6 +32,7 @@ function BrowsingGraph() {
         } else {
             this.adj[src].add(dest);
         }
+        console.log("ADDING????", src, dest);
         _d3links.push({source : src, target : dest, value : 1});
     }
 
