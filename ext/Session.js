@@ -4,6 +4,7 @@
 // TODO: application-wide single-point-of-truth for types of items to be logged?
 var Session = (function (url) {
     var instance;
+    var CAPTURE_MSG_PREFIX = 'capture-';
     var capture_types = ['links','pages','interactions']
     var INIT_MAX = 50;
     var _captures = {}
@@ -23,6 +24,7 @@ var Session = (function (url) {
             _captures[type] = new Capture(type);
         });
         return {
+            capture_message_name: CAPTURE_MSG_PREFIX,
             MAX_PAGEVISITS: max,
             MAX_LINKCLICKS: max,
             MAX_INTERACTIONS: max,

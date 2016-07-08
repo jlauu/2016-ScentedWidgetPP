@@ -8,6 +8,9 @@
       "persistent": true,
       "scripts": [
           "PageVisit.js",
+          "BrowsingGraph.js",
+          "UserCluster.js",
+          "ClusterManager.js",
           "Session.js",
           "main.js"
       ]

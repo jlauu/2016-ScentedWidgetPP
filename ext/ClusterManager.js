@@ -2,6 +2,7 @@
 
 var ClusterManager = (function () {
     var instance;
+    var QUERY_MSG_NAME = 'cluster_query';
 
     function init(id) {
         var userid = id;
@@ -15,9 +16,9 @@ var ClusterManager = (function () {
 
         getClusters().forEach(function (c) {
             clusters[c.name] = c;
-        }
+        });
 
-        function new(name, url) {
+        function mkCluster(name, url) {
             if (!name) {
                 name = '_unnamed' + uname_id.toString();
                 uname_id++;    
@@ -53,7 +54,8 @@ var ClusterManager = (function () {
             return results;
         }
         return {
-            new : new,
+            query_message_name: QUERY_MSG_NAME,
+            mkCluster: mkCluster,
             addToCluster : addToCluster,
             get : get,
             getClusters : getClusters,

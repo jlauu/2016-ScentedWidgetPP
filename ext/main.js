@@ -2,10 +2,12 @@
 'use strict';
 
 var session = Session.getInstance();
+var clusters = ClusterManager.getInstance();
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    console.log(request.type);
     // Logs when user clicks a link
-    if (request.type.includes("capture-")) {
-        var type = request.type.substr("capture-".length);
+    if (request.type.includes(session.capture_message_name)) {
+        var type = request.type.substr(session.capture_message_name.length);
         var e = request.event;
         var pass_exclusions = ['from', 'to', 'url'].every(function (url) {
                 return !e['url'] || !e['url'].includes(session.webhost);
@@ -13,6 +15,10 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         if (pass_exclusions) {
             session.capture(type, request.event);
         }
+    // Handle queries to cluster manager
+    } else if (request.type == clusters.query_message_name) {
+        var results = clusters.getClustersByUrl(request.url);
+        sendResponse({clusters: results});
     }
 });
 

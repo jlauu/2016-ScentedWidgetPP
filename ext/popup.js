@@ -4,86 +4,34 @@
 var config = {
     node_style_fill: function (d) {return d.focus ? 2 : 1;},
     node_attr_r: 5,
+    tabs: null,
+    json: null // use fetchData
 };
 
 function main () {
-    fetchData(function () {
-        if (config.json.nodes.length) {
-            startGraph();
-        } else {
-            d3.select('body, html')
-                .style("width", 300)
-                .style("height", 150)
-            d3.select('body').append('div')
-                .attr("id", "retry")
-                .style("background-color", "steelblue")
-                .text("Retry?")
-                .on("click", function () {
-                    d3.selectAll("retry").remove();
-                    main();
-                });
-        }
-    });
-}
-
-function saveJSON (json) {
-    chrome.storage.local.set({"swpp_data": json}, function () {
-        console.log("success");
-    });
-}
-
-// Gets json data from server or storage and applies changes to config
-function fetchData (callback) {
-    chrome.storage.local.get("swpp_data", function (items) {
-        if (items.swpp_data) {
-            console.log("fetching from storage...");
-            config.json = items.swpp_data;
-            callback();
-        } else {
-            console.log("fetching from server...");
-            var xhr = new XMLHttpRequest();
-            var userid = chrome.extension.getBackgroundPage().session.userID;
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState == 4 && xhr.status == 200) {
-                    config.json = JSON.parse(xhr.responseText);
-                    saveJSON(config.json);
-                    callback();
+    // Get current tab url
+    chrome.tabs.query({'active': true, 'currentWindow': true}, function (tabs) {
+        if (tabs.length >= 0 && tabs[0].url) {
+            var url = tabs[0].url;
+            config.url = url;
+            chrome.runtime.sendMessage({type: 'cluster_query', url: url}, function (response) {
+                console.log("query", response);
+                if (response.clusters && response.clusters.length > 0) {
+                    // TODO: Display clusters
+                } else {
+                    promptNewCluster();
                 }
-            }
-            xhr.open("GET", "https://swpp-server-stage.herokuapp.com/?uid="+userid, true);
-            xhr.send();
+            });
         }
     });
 }
 
-function startGraph() {
-    chrome.tabs.query({'active': true,'currentWindow': true}, function (tabs) {
-        config.tab = tabs[0];
-        d3.selectAll('body, html')
-            .style("width", 600)
-            .style("height", 500);
-        var minimap = MiniSWPP.getInstance(config);
-        minimap.start();
-        if (minimap.graph.nodes <= 0) {
-            minimap.force.stop();
-            var button = d3.select('body').append('div')
-                .attr("id", "create-cluster")
-                .text("Create Cluster");
-            button.on("click", function () {
-                button.remove();
-                console.log(config);
-                var g = config.json.groups[config.json.groups.length-1] + 1
-                config.json.groups.push(g);
-                config.json.nodes.push({
-                    url: config.tab.url, 
-                    id: config.json.nodes.length, 
-                    group: g
-                });
-                saveJSON();
-                startGraph();
-            })
-        }
-    });
+function promptNewCluster() {
+    console.log("new cluster");
+    d3.select('html body')
+        .style('width', 200)
+        .style('height', 135)
+      .text('New Cluster');
 }
 
 var MiniSWPP = (function () {
