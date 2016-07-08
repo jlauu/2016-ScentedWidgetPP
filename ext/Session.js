@@ -1,23 +1,26 @@
-// session.js: manager of the a browsing session
+// Session.js: manager of the a browsing session
 'use strict';
 
+// TODO: application-wide single-point-of-truth for types of items to be logged?
 var Session = (function (url) {
     var instance;
     var capture_types = ['links','pages','interactions']
     var INIT_MAX = 50;
+    var _captures = {}
 
-    function mkCapture(type) {
-        var c = {}
-        c[type] = {'type': type, 'MAX': INIT_MAX, 'fails':0, 'log':[]};
-        return c
+    // Maintains a log and metadata for one type of event
+    function Capture(type) {
+        this.type = type;
+        this.MAX = INIT_MAX;
+        this.fails = 0;
+        this.log = [];
     }
 
     function init() {
         var max = 50
         var id = -1;
-        var _captures = {}
         capture_types.forEach(function (type) {
-            _captures[type] = mkCapture(type);
+            _captures[type] = new Capture(type);
         });
         return {
             MAX_PAGEVISITS: max,
@@ -30,6 +33,7 @@ var Session = (function (url) {
                     c.log = [];
                 });
             },
+            // Logs an event
             capture: function (type, e) {
                 var c = _captures[type];
                 e['userID'] = this.userID ? this.userID : "";
@@ -39,6 +43,7 @@ var Session = (function (url) {
                     c.log = [];
                 }
             },
+            // Sends logged data for one capture type to the server as a json
             sendJSON: function (type, data) {
                 var xhr = new XMLHttpRequest();
                 var json = JSON.stringify({'type':type, 'data':data});
@@ -51,6 +56,7 @@ var Session = (function (url) {
                 }
                 xhr.send(json);
             },
+            // Sends all logged data to the server
             unload: function () {
                 var send = this.sendJSON;
                 Object.values(_captures).forEach(function (c) {

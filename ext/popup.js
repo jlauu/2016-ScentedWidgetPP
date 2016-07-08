@@ -7,7 +7,23 @@ var config = {
 };
 
 function main () {
-    fetchData(startGraph);
+    fetchData(function () {
+        if (config.json.nodes.length) {
+            startGraph();
+        } else {
+            d3.select('body, html')
+                .style("width", 300)
+                .style("height", 150)
+            d3.select('body').append('div')
+                .attr("id", "retry")
+                .style("background-color", "steelblue")
+                .text("Retry?")
+                .on("click", function () {
+                    d3.selectAll("retry").remove();
+                    main();
+                });
+        }
+    });
 }
 
 function saveJSON (json) {
@@ -20,7 +36,7 @@ function saveJSON (json) {
 function fetchData (callback) {
     chrome.storage.local.get("swpp_data", function (items) {
         if (items.swpp_data) {
-            console.log("fetching from sync...");
+            console.log("fetching from storage...");
             config.json = items.swpp_data;
             callback();
         } else {
@@ -30,7 +46,7 @@ function fetchData (callback) {
             xhr.onreadystatechange = function () {
                 if (xhr.readyState == 4 && xhr.status == 200) {
                     config.json = JSON.parse(xhr.responseText);
-                    saveJSON (config.json);
+                    saveJSON(config.json);
                     callback();
                 }
             }
@@ -48,6 +64,25 @@ function startGraph() {
             .style("height", 500);
         var minimap = MiniSWPP.getInstance(config);
         minimap.start();
+        if (minimap.graph.nodes <= 0) {
+            minimap.force.stop();
+            var button = d3.select('body').append('div')
+                .attr("id", "create-cluster")
+                .text("Create Cluster");
+            button.on("click", function () {
+                button.remove();
+                console.log(config);
+                var g = config.json.groups[config.json.groups.length-1] + 1
+                config.json.groups.push(g);
+                config.json.nodes.push({
+                    url: config.tab.url, 
+                    id: config.json.nodes.length, 
+                    group: g
+                });
+                saveJSON();
+                startGraph();
+            })
+        }
     });
 }
 

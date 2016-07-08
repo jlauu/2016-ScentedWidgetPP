@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-
+  "omnibox": {"keyword": "SWPP"},
   "name": "ScentedWidgetPP",
   "description": "Web session modelling and analysis",
   "version": "1.0",
