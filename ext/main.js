@@ -4,40 +4,56 @@
 var session = Session.getInstance();
 var clusters = ClusterManager.getInstance();
 
+// Browsing Event handlers
+
+// Logs user clicks and input interactions
+function logUserBrowsingInteractions (request) {
+    var type = request.type.substr(session.capture_message_name.length);
+    var e = request.event;
+    var pass_exclusions = ['from', 'to', 'url'].every(function (url) {
+            return !e['url'] || !e['url'].includes(session.webhost);
+    });
+    if (pass_exclusions) {
+        session.capture(type, request.event);
+    }
+}
+
+// Handle queries to cluster manager
+function queryClusters (request, sendResponse) {
+    var results = clusters.getClustersByUrl(request.url);
+    results.map(function (c) {return c.toJSON();});
+    sendResponse({jsons: results});
+}
+
+// Requests a new cluster created
+function newCluster (request, sendResponse) {
+    var c = clusters.mkCluster(null, request.url);
+    var json = c.toJSON();
+    sendResponse({json: json});
+}
+
+// Registers a tab or window to a cluster
+function registerTabWindows (request) {
+    var tab = request.tab;
+    var w = request.window;
+    if (tab) session.registerTab(tab, request.cluster_id);
+    if (w) session.registerWindow(w, request.cluster_id);
+}
+
 // Window/Tab Event Capturing Listeners
 chrome.tabs.onCreated.addListener(session.registerTab);
-
 chrome.windows.onCreated.addListener(session.registerWindow);
 
-// Browsing Event Capturing Listeners
+// Message Passing function table
+var messageHandlers = {};
+messageHandlers[session.capture_message_name] = logUserBrowsingInteractions;
+messageHandlers[clusters.query_message_name] = queryClusters;
+messageHandlers[clusters.new_message_name] = newCluster;
+messageHandlers[session.register_message_name] = registerTabWindows;
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    // Logs when user clicks a link
-    if (request.type.includes(session.capture_message_name)) {
-        var type = request.type.substr(session.capture_message_name.length);
-        var e = request.event;
-        var pass_exclusions = ['from', 'to', 'url'].every(function (url) {
-                return !e['url'] || !e['url'].includes(session.webhost);
-        });
-        if (pass_exclusions) {
-            session.capture(type, request.event);
-        }
-    // Handle queries to cluster manager
-    } else if (request.type == clusters.query_message_name) {
-        var results = clusters.getClustersByUrl(request.url);
-        results.map(function (c) {return c.toJSON();});
-        sendResponse({jsons: results});
-    // Request a new cluster
-    } else if (request.type == clusters.new_message_name) {
-        var c = clusters.mkCluster(null, request.url);
-        var json = c.toJSON();
-        sendResponse({json: json});
-    // Register tab or window with cluster
-    } else if (request.type == session.register_message_name) {
-        var tab = request.tab;
-        var w = request.window;
-        if (tab) session.registerTab(tab, request.cluster_id);
-        if (w) session.registerWindow(w, request.cluster_id);
+    if (messageHandlers[request.type]) {
+        messageHandlers[request.type](request, sendResponse);
     }
 });
 
