@@ -24,18 +24,18 @@ var Session = (function () {
         var _captures = {};
         var max = 50;
         var id = -1;
-        var tabClusters = {};
-        var windowClusters = {};
+        var tabClusters = new Map();
+        var windowClusters = new Map();
 
         // public
         capture_types.forEach(function (type) {
             _captures[type] = new Capture(type);
         });
         function clearLogs () {
-            Object.values(_captures).forEach(function (c) {
-                c.log = [];
-            });
-        };
+            for (var i in _captures) {
+                _captures[i].log = [];
+            }
+        }
 
         // Logs an event
         function capture (type, e) {
@@ -46,7 +46,8 @@ var Session = (function () {
                 sendJSON(type, c.log);
                 c.log = [];
             }
-        };
+        }
+
         // Sends logged data for one capture type to the server as a json
         function sendJSON (type, data) {
             var xhr = new XMLHttpRequest();
@@ -59,7 +60,8 @@ var Session = (function () {
                 }
             }
             xhr.send(json);
-        };
+        }
+
         // Sends all logged data to the server
         function unload () {
             var send = sendJSON;
@@ -70,24 +72,28 @@ var Session = (function () {
                    c.log = [];
                }
             });
-        };
+        }
+
         function clusterOfTab(tab_id) {
-            return tabClusters[tab_id];
-        };
+            return tabClusters.get(tab_id);
+        }
+
         function clusterOfWindow(window_id) {
-            return windowClusters[window_id];
-        };
+            return windowClusters.get(window_id);
+        }
+
         function registerTab(tab, cluster_id) {
             if (cluster_id) {
-                tabClusters[tab.id] = cluster_id;
+                tabClusters.set(tab.id, cluster_id);
             } else if (tab.openerTabId && clusterOfTab(tab.openerTabId)) {
-                tabClusters[tab.id] = clusterOfTab(tab.openerTabId);
+                tabClusters.set(tab.id, clusterOfTab(tab.openerTabId));
             } else if (clusterOfWindow(tab.windowId)) {
-                tabClusters[tab.id] = clusterOfWindow(tab.windowId);
+                tabClusters.set(tab.id, clusterOfWindow(tab.windowId));
             } else {
-                tabClusters[tab.id] = null;
+                tabClusters.set(tab.id, null);
             }
-        };
+        }
+
         function registerWindow (w, cluster_id) {   
             if (w.type && w.type != 'normal') return;
             if (cluster_id) {
@@ -95,6 +101,18 @@ var Session = (function () {
             } else {
                 windowClusters[w.id] = null;
             }
+        }
+
+        function getRegistered(map) {
+            var results = [];
+            map.forEach(function (v,k) {
+                results.push({id: k, cluster: v});
+            });
+            return results;
+        }
+
+        function unregister(map, id) {
+            map.delete(id);
         }
 
         return {
@@ -106,6 +124,18 @@ var Session = (function () {
             webhost: webhost,
             registerWindow: registerWindow,   
             registerTab: registerTab,
+            getRegisteredTabs: function () {
+                return getRegistered(tabClusters);
+            },
+            getRegisteredWindows: function () {
+                return getRegistered(windowClusters);
+            },
+            unregisterTab: function (id) {
+                return unregister(tabClusters, id);
+            },
+            unregisterWindow: function (id) {
+                return unregister(windowClusters, id);
+            },
             clusterOfWindow: clusterOfWindow,
             unload: unload,
             clearLogs: clearLogs,

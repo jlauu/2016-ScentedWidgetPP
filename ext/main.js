@@ -127,6 +127,15 @@ chrome.history.onVisited.addListener (function (historyItem) {
     }
 });
 
+// Unregister closed tab/window
+chrome.windows.onRemoved.addListener(function (windowId) {
+    session.unregisterWindow(windowId);
+});
+
+chrome.tabs.onRemoved.addListener(function (tabId) {
+    session.unregisterTab(tabId);
+});
+
 // Save data to file before closing
 chrome.windows.onRemoved.addListener(function (windowId) {
     session.unload();
