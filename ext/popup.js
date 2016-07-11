@@ -1,12 +1,13 @@
 'use strict';
-
-// layout and display configuration
+// Graph layout and display configuration
 var config = {
     node_style_fill: function (d) {return d.focus ? 2 : 1;},
     node_attr_r: 5,
     tabs: null,
     json: null, // use fetchData
 };
+
+var cluster_data = null;
 
 function main () {
     // Get current tab url
@@ -17,8 +18,7 @@ function main () {
             config.url = url;
             chrome.runtime.sendMessage({type: 'cluster_query', url: url}, function (response) {
                 if (response.jsons && response.jsons.length > 0) {
-                    config.json = response.jsons[0];
-                    drawGraph();
+                    getResponse(response.jsons[0], drawGraph);
                 } else {
                     promptNewCluster();
                 }
@@ -34,7 +34,7 @@ function setPopupSize(w, h) {
 }
 
 function promptNewCluster() {
-    setPopupSize(150,300);
+    setPopupSize(150,100);
     d3.select('body').append('div')
         .attr('id', 'create-cluster')
         .text('Create Cluster')
@@ -43,14 +43,20 @@ function promptNewCluster() {
                 function (response) {
                     d3.select('#create-cluster').remove();
                     chrome.runtime.sendMessage({type:'register', tab: config.tab});
-                    config.json = response.json;
-                    setPopupSize(600,500);
-                    drawGraph();
+                    getResponse(response.json, drawGraph);
                 });
         });
 }
 
+function getResponse(data, callback) {
+    cluster_data = data;
+    config.json = cluster_data.graph;
+    callback();
+}
+
+// Expects config.json to be defined
 function drawGraph() {
+    setPopupSize(600,500);
     var minimap = MiniSWPP.getInstance(config);
     minimap.start();
 }

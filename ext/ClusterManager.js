@@ -26,7 +26,6 @@ var ClusterManager = (function () {
             var cluster = new UserCluster(name, [], null); 
             cluster.addUrl(url);
             clusters[name] = cluster;
-            console.log(cluster);
             return cluster;
         }
 
