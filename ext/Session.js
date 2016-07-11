@@ -74,17 +74,24 @@ var Session = (function () {
             });
         }
 
-        function clusterOfTab(tab_id) {
-            return tabClusters.get(tab_id);
+        // Returns the most recent link capture
+        function getLastLink() {
+            var log = _captures['links'].log;
+            return log[log.length-1];
         }
 
+        // Returns the cluster id or null
+        function clusterOfTab(tabId) {
+            return tabClusters.get(tabId);
+        }
+        // Returns the cluster id or null
         function clusterOfWindow(window_id) {
             return windowClusters.get(window_id);
         }
 
-        function registerTab(tab, cluster_id) {
-            if (cluster_id) {
-                tabClusters.set(tab.id, cluster_id);
+        function registerTab(tab, clusterId) {
+            if (clusterId) {
+                tabClusters.set(tab.id, clusterId);
             } else if (tab.openerTabId && clusterOfTab(tab.openerTabId)) {
                 tabClusters.set(tab.id, clusterOfTab(tab.openerTabId));
             } else if (clusterOfWindow(tab.windowId)) {
@@ -94,10 +101,10 @@ var Session = (function () {
             }
         }
 
-        function registerWindow (w, cluster_id) {   
+        function registerWindow (w, clusterId) {   
             if (w.type && w.type != 'normal') return;
-            if (cluster_id) {
-                windowClusters[w.id] = cluster_id;
+            if (clusterId) {
+                windowClusters[w.id] = clusterId;
             } else {
                 windowClusters[w.id] = null;
             }
@@ -122,6 +129,7 @@ var Session = (function () {
             MAX_LINKCLICKS: max,
             MAX_INTERACTIONS: max,
             webhost: webhost,
+            getLastLink: getLastLink,
             registerWindow: registerWindow,   
             registerTab: registerTab,
             getRegisteredTabs: function () {
@@ -137,6 +145,7 @@ var Session = (function () {
                 return unregister(windowClusters, id);
             },
             clusterOfWindow: clusterOfWindow,
+            clusterOfTab: clusterOfTab,
             unload: unload,
             clearLogs: clearLogs,
             capture: capture,

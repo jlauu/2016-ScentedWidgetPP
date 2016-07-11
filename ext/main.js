@@ -136,6 +136,21 @@ chrome.tabs.onRemoved.addListener(function (tabId) {
     session.unregisterTab(tabId);
 });
 
+// Update clusters on tab update
+chrome.tabs.onUpdated.addListener(function (tabId, info, tab) {
+    var cluster = session.clusterOfTab(tabId);
+    if (cluster && info.url) {
+        var url = SWPPUtils.normalizeUrl(info.url);
+        // Check if we can make an edge based on last logged link
+        var last = session.getLastLink();
+        var last_url = SWPPUtils.normalizeUrl(last.to);
+        if (last_url == url) {
+            var links = [{from: SWPPUtils.normalizeUrl(last.from), to: last_url}];
+        }
+        clusters.addToCluster(cluster, [url], links || []);
+    }
+});
+
 // Save data to file before closing
 chrome.windows.onRemoved.addListener(function (windowId) {
     session.unload();
