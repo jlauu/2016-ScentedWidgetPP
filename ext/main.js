@@ -9,7 +9,6 @@ var clusters = ClusterManager.getInstance();
 // Logs user clicks and input interactions
 function logUserBrowsingInteractions (request) {
     // Log to Session
-    console.log(request);
     var type = request.type.substr(session.capture_message_name.length);
     var e = request.event;
     var pass_exclusions = ['from', 'to', 'url'].every(function (url) {
@@ -20,7 +19,6 @@ function logUserBrowsingInteractions (request) {
     }
     // Update Clusters
     if (type == 'links') {
-        console.log(e);
         var results = clusters.getClustersByUrl(e.from);
         if (results.length) {
             clusters.addToCluster(results[0].name,[],[e]);
@@ -39,8 +37,14 @@ function queryClusters (request, sendResponse) {
 function newCluster (request, sendResponse) {
     var c = clusters.mkCluster(null, request.url);
     var json = c.toJSON();
-    console.log(json);
     sendResponse({json: json});
+}
+
+// Updates a cluster
+function editCluster (request) {
+    if (request.name) {
+        clusters.editName(request.name.old, request.name.new);
+    }
 }
 
 // Registers a tab or window to a cluster
@@ -60,6 +64,7 @@ var messageHandlers = {};
 //messageHandlers[session.capture_message_name] = logUserBrowsingInteractions;
 messageHandlers[clusters.query_message_name] = queryClusters;
 messageHandlers[clusters.new_message_name] = newCluster;
+messageHandlers[clusters.edit_message_name] = editCluster;
 messageHandlers[session.register_message_name] = registerTabWindows;
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {

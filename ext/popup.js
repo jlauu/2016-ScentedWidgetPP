@@ -18,7 +18,7 @@ function main () {
             config.url = url;
             chrome.runtime.sendMessage({type: 'cluster_query', url: url}, function (response) {
                 if (response.jsons && response.jsons.length > 0) {
-                    getResponse(response.jsons[0], drawGraph);
+                    getResponse(response.jsons[0], draw);
                 } else {
                     promptNewCluster();
                 }
@@ -26,13 +26,8 @@ function main () {
         }
     });
 }
-
-function setPopupSize(w, h) {
-    d3.select('html','body')
-        .style('width', w)
-        .style('height', h)
-}
-
+// TODO: abstract to chrome background views?
+// Sets the popup view to new cluster dialogue
 function promptNewCluster() {
     setPopupSize(150,100);
     d3.select('body').append('div')
@@ -43,22 +38,58 @@ function promptNewCluster() {
                 function (response) {
                     d3.select('#create-cluster').remove();
                     chrome.runtime.sendMessage({type:'register', tab: config.tab});
-                    getResponse(response.json, drawGraph);
+                    getResponse(response.json, draw);
                 });
         });
 }
 
+// Expects config.json to be defined
+function draw() {
+    setPopupSize(600,500);
+    var minimap = MiniSWPP.getInstance(config);
+    minimap.start();
+    drawTitle();
+}
+
+function drawTitle() {
+    var setTitle = function () {
+        if (cluster_data.name.includes('_unnamed')) {
+            return 'Untitled (Click to set)';
+        } else {
+            return cluster_data.name;
+        }
+    };
+    var box = d3.select('#cluster-title');
+    var input = box.append('input')
+        .attr('inputmode', 'verbatim')
+        .attr('maxlength', 20)
+        .attr('pattern', '[a-zA-Z0-9._]')
+        .attr('type', 'text')
+        .attr('placeholder', setTitle)
+   var apply = box.append('button')
+        .attr('name','apply')
+        .text('Apply')
+        .on('click', function () {
+            var name = input[0][0].value;
+            console.log(name);
+            chrome.runtime.sendMessage({
+                'type':'cluster_edit',
+                'name': {'old':cluster_data.name,'new':name}
+            });
+            cluster_data.name = name;
+        });
+}
+
+function setPopupSize(w, h) {
+    d3.select('html','body')
+        .style('width', w)
+        .style('height', h)
+}
+// Sets the config and cluster_data
 function getResponse(data, callback) {
     cluster_data = data;
     config.json = cluster_data.graph;
     callback();
-}
-
-// Expects config.json to be defined
-function drawGraph() {
-    setPopupSize(600,500);
-    var minimap = MiniSWPP.getInstance(config);
-    minimap.start();
 }
 
 var MiniSWPP = (function () {
