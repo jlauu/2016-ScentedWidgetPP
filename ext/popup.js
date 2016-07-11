@@ -13,14 +13,14 @@ function main () {
     // Get current tab url
     chrome.tabs.query({'active': true, 'currentWindow': true}, function (tabs) {
         if (tabs.length >= 0 && tabs[0].url) {
-            config.tabs = tabs[0];
+            config.tab = tabs[0];
             var parser = document.createElement('a');
             parser.href = tabs[0].url;
             var url = parser.hostname + parser.pathname + parser.search;
             config.url = url;
             chrome.runtime.sendMessage({type: 'cluster_query', url: url}, function (response) {
                 if (response.jsons && response.jsons.length > 0) {
-                    getResponse(response.jsons[0], draw);
+                    getClusterResponse(response.jsons[0], draw);
                 } else {
                     promptNewCluster();
                 }
@@ -39,8 +39,7 @@ function promptNewCluster() {
             chrome.runtime.sendMessage({type: 'cluster_new', url: config.url}, 
                 function (response) {
                     d3.select('#create-cluster').remove();
-                    chrome.runtime.sendMessage({type:'register', tab: config.tab});
-                    getResponse(response.json, draw);
+                    getClusterResponse(response.json, draw);
                 });
         });
 }
@@ -73,12 +72,12 @@ function drawTitle() {
         .text('Apply')
         .on('click', function () {
             var name = input[0][0].value;
-            console.log(name);
             chrome.runtime.sendMessage({
                 'type':'cluster_edit',
                 'name': {'old':cluster_data.name,'new':name}
             });
             cluster_data.name = name;
+            saveClusterData();
         });
 }
 
@@ -88,10 +87,19 @@ function setPopupSize(w, h) {
         .style('height', h)
 }
 // Sets the config and cluster_data
-function getResponse(data, callback) {
+function getClusterResponse(data, callback) {
     cluster_data = data;
     config.json = cluster_data.graph;
+    saveClusterData();
     callback();
+}
+
+function saveClusterData() {
+    chrome.runtime.sendMessage({
+        type:'register', 
+        tab: config.tab,
+        cluster_id: cluster_data.name}
+    );
 }
 
 var MiniSWPP = (function () {
