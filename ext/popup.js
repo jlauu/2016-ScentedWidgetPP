@@ -103,8 +103,39 @@ function saveClusterData() {
 }
 
 var MiniSWPP = (function () {
+    // Extend with interaction
+    var mixin = (function () {
+        function extension(SWPP) {
+            SWPP.prototype.postStart = function () {
+                var swpp = this;
+                this.nodes
+                // Go to url in current tab
+                .on("dblclick", function (d) {
+                    chrome.tabs.update({url: "https://" + d.url});
+                })
+                // Dispaly url
+                .on("mouseover", function (d) {
+                    var text = swpp.svg.append("text")
+                        .attr('id', 'url-text')
+                        .attr('y', 15)
+                        .attr('x', 15)
+                        .attr('dy', '.35em')
+                        .text(d.url);
+                })
+                .on("mouseleave", function () {
+                    swpp.svg.selectAll('#url-text').remove();
+                });
+
+            }
+        }
+
+        return {
+            applyExtension: extension
+        };
+    })();
+
     // Base graph interface
-    var ExtendedSWPP = (function (mixin) {
+    var SWPP = (function (mixin) {
         var instance;
 
         function SWPPGraph(config) {
@@ -256,11 +287,11 @@ var MiniSWPP = (function () {
                 return instance;
             }
        };
-    })({});
+    })(mixin || {});
 
     // Return the extended graph interface
     return {
-        getInstance: ExtendedSWPP.getInstance
+        getInstance: SWPP.getInstance
     };
 })();
     

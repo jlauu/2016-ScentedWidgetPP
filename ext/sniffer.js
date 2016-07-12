@@ -53,7 +53,8 @@
                   'event': {
                      'event': type, 
                      'url': url, 
-                     'target': target.outerHTML,
+                       //TODO: safe representation of dom element?
+                     'target':  "" //target.outerHTML,
                      'time' : time
                    }
        };

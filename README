@@ -1,10 +1,7 @@
 # ScentedWidgetPP
 Modeling user agendas in web sessions.
 
-Useful links:
-- https://developer.chrome.com/extensions/webNavigation
-
-/ext - SWPP chrome extension package
+/ext - SWPP Chrome (Version 51) extension package
 /toysite - Testing website
 
 To install the extension:
