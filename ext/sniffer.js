@@ -53,8 +53,7 @@
                   'event': {
                      'event': type, 
                      'url': url, 
-                     // TODO: only grab element, not its children
-                     'target':  "", //target.outerHTML ,
+                     'target':  target.cloneNode(),
                      'time' : time
                    }
        };
