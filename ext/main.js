@@ -68,7 +68,6 @@ messageHandlers[clusters.edit_message_name] = editCluster;
 messageHandlers[session.register_message_name] = registerTabWindows;
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    console.log(request);
     if (request.type.includes(session.capture_message_name)) {
         logUserBrowsingInteractions(request);
     } else if (messageHandlers[request.type]) {
@@ -144,7 +143,6 @@ chrome.tabs.onUpdated.addListener(function (tabId, info, tab) {
         var url = SWPPUtils.normalizeUrl(info.url);
         // Check if we can make an edge based on last logged link
         var last = session.getLastLink();
-        console.log(last);
         if (last && last.to == url) {
                 var links = [{from: SWPPUtils.normalizeUrl(last.from), to: last.to}];
         }
