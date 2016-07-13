@@ -3,8 +3,12 @@
 var config = {
     node_style_fill: function (d) {return d.focus ? 2 : 1;},
     node_attr_r: 5,
+    gravity: .1,
+    charge: -60,
+    linkDistance: 60,
+    linkStrength: .1,
     tabs: null,
-    json: null, // use fetchData
+    json: null,
 };
 
 var cluster_data = null;
@@ -158,6 +162,7 @@ var MiniSWPP = (function () {
                 .linkDistance(config.linkDistance || 15)
                 .linkStrength(config.linkStrength || .2)
                 .size([this.width,this.height])
+            console.log(this.force);
             
             var color = d3.scale.category20();
             this.svg = d3.select("div.svg-container").append("svg")
