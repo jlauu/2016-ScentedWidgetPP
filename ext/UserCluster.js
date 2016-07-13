@@ -18,7 +18,7 @@ function UserCluster(name, keywords, graph) {
     }
 
     this.toJSON = function () {
-        return {name: this.name, keywords: this.keywords, graph: this.graph.toJSON()};
+        return {name: this.name, keywords: this.keywords, cluster: this.graph.toJSON()};
     }
     
     // Produces a json with nodes grouped by their old clusters
@@ -26,6 +26,6 @@ function UserCluster(name, keywords, graph) {
         var name = this.name + "-" + cluster.name;
         var keywords = Array.from(new Set(this.keywords.concat(cluster.name)));
         var graph = this.graph.mergeJSON(cluster.graph);
-        return {name: name, keywords: keywords, graph: graph};
+        return {name: name, keywords: keywords, cluster: graph};
     }
 }

@@ -16,7 +16,7 @@
        var elem = e.target;
        // Anchor tag
        if (elem.tagName == 'A') {
-           logLinkClicked(elem.target);
+           logLinkClicked(elem);
        // Image tage
        } else if (elem.tagName == 'IMG' && elem.parentNode.tagName == 'A') {
            logLinkClicked(elem.parentNode);

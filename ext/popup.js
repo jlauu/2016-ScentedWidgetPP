@@ -92,7 +92,7 @@ function setPopupSize(w, h) {
 // Sets the config and cluster_data
 function getClusterResponse(data, callback) {
     cluster_data = data;
-    config.json = cluster_data.graph;
+    config.json = cluster_data.cluster;
     saveClusterData();
     callback();
 }
@@ -162,7 +162,6 @@ var MiniSWPP = (function () {
                 .linkDistance(config.linkDistance || 15)
                 .linkStrength(config.linkStrength || .2)
                 .size([this.width,this.height])
-            console.log(this.force);
             
             var color = d3.scale.category20();
             this.svg = d3.select("div.svg-container").append("svg")

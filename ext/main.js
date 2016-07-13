@@ -149,4 +149,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, info, tab) {
 // Save data to file before closing
 chrome.windows.onRemoved.addListener(function (windowId) {
     session.unload();
+    clusters.getClusters().forEach(function (c) {
+        session.sendJSON('cluster', c.toJSON());
+    });
 });
