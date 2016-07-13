@@ -30,7 +30,7 @@ var ClusterManager = (function () {
             return clusters.get(name);
         }
 
-        function addToCluster(name, urls, links) {
+        function addToCluster(name, urls, links, keywords) {
             var c = get(name);
             urls.forEach(function (url) {
                 c.addUrl(url);

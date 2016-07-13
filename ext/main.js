@@ -133,8 +133,7 @@ chrome.tabs.onRemoved.addListener(function (tabId) {
 chrome.tabs.onUpdated.addListener(function (tabId, info, tab) {
     var cluster = session.clusterOfTab(tabId);
     if (cluster && info.url) {
-        var url = URL(info.url);
-        url = url.host() + url.path() + url.queryString();
+        var url = normalizeUrl(info.url);
         // Check if we can make an edge based on last logged link
         var last = session.getLastLink();
         if (last && last.to == url) {
@@ -150,6 +149,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, info, tab) {
 chrome.windows.onRemoved.addListener(function (windowId) {
     session.unload();
     clusters.getClusters().forEach(function (c) {
-        session.sendJSON('cluster', c.toJSON());
+        if (!c.name.includes(clusters.UNNAMED_PREFIX))
+            session.sendJSON('cluster', c.toJSON());
     });
 });

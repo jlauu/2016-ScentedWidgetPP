@@ -2,7 +2,7 @@
 
 function UserCluster(name, keywords, graph) {
     this.name = name;
-    this.keywords = keywords || [];
+    this.keywords = new Set(keywords) || new Set();
     this.graph = graph || new BrowsingGraph();
 
     this.addUrl = function (url) {
@@ -11,6 +11,18 @@ function UserCluster(name, keywords, graph) {
 
     this.addLink = function(url_from, url_to) {
         this.graph.addLink(url_from, url_to);
+    }
+    
+    this.addKeywords = function (kws) {
+        kws.forEach(function (kw) {
+            keywords.add(kw); 
+        });
+    }
+
+    this.removeKeywords = function (kws) {
+        kws.forEach(function (kw) {
+            keywords.delete(kw);
+        });
     }
 
     this.hasUrl = function (url) {

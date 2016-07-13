@@ -64,11 +64,10 @@ var Session = (function () {
 
         // Sends all logged data to the server
         function unload () {
-            var send = sendJSON;
             Object.keys(_captures).forEach(function (k) {
                var c = _captures[k];
                if (c.log.length > 0) {
-                   send(c.type, c.log);
+                   sendJSON(c.type, c.log);
                    c.log = [];
                }
             });

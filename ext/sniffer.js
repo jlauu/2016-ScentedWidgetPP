@@ -13,23 +13,25 @@
 
    function mouseHandler (e) {
        var e = window.e || e;
-       var elem = e.target;
+       var elem = findAnchor(e.target);
        // Anchor tag
-       if (elem.tagName == 'A') {
-           logLinkClicked(elem);
-       // Image tage
-       } else if (elem.tagName == 'IMG' && elem.parentNode.tagName == 'A') {
-           logLinkClicked(elem.parentNode);
+       if (elem) {
+           logLinkClicked(elem); 
+       } else {  
+           logInteraction(e);
        }
-   
-       logInteraction(e);
+   }
+
+   function findAnchor (e) {
+        if (e == null || e.tagName == 'A') 
+            return e;
+        else
+            return findAnchor(e.parentNode);
    }
    
    function logLinkClicked (tgt) {
-       var from = URL(document.URL);
-       from = from.host() + from.path() + from.queryString();
-       var to = URL(URL.resolve(document.URL, tgt.href));
-       to = to.host() + to.path() + to.queryString();
+       var from = normalizeUrl(document.URL);
+       var to = normalizeUrl(URL.resolve(document.URL, tgt.href));
        var time = Date.now();
        var msg = {
            'type': "capture-links", 

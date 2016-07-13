@@ -8,6 +8,7 @@
       "persistent": true,
       "scripts": [
           "lib/url-min.js",
+          "utils.js",
           "PageVisit.js",
           "BrowsingGraph.js",
           "UserCluster.js",
@@ -19,9 +20,11 @@
   "content_scripts": [
       {
         "matches": ["http://*/*", "https://*/*"],
-        "js": ["lib/url-min.js",
-               "lib/jquery-1.12.1.min.js",
-               "sniffer.js"
+        "js": [
+            "lib/url-min.js",
+            "utils.js",
+            "lib/jquery-1.12.1.min.js",
+            "sniffer.js"
         ]
       }
   ],
