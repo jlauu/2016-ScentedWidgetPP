@@ -36,7 +36,14 @@ function newCluster (request, sendResponse) {
 // Updates a cluster
 function editCluster (request) {
     if (request.name) {
-        clusters.editName(request.name.old, request.name.new);
+        if (request.edit_type == 'add') {
+            clusters.addToCluster(request.name, 
+                                  request.nodes || [],
+                                  request.links || [],
+                                  request.keywords || []);
+        } else if (request.new_name) {
+            clusters.editName(request.name, request.new_name);
+        }
     }
 }
 
@@ -134,6 +141,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, info, tab) {
     var cluster = session.clusterOfTab(tabId);
     if (cluster && info.url) {
         var url = normalizeUrl(info.url);
+        if (url.includes('chrome://')) return;
         // Check if we can make an edge based on last logged link
         var last = session.getLastLink();
         if (last && last.to == url) {

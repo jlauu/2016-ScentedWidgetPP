@@ -15,14 +15,14 @@ function UserCluster(name, keywords, graph) {
     
     this.addKeywords = function (kws) {
         kws.forEach(function (kw) {
-            keywords.add(kw); 
-        });
+            this.keywords.add(kw); 
+        }, this);
     }
 
     this.removeKeywords = function (kws) {
         kws.forEach(function (kw) {
-            keywords.delete(kw);
-        });
+            this.keywords.delete(kw);
+        }, this);
     }
 
     this.hasUrl = function (url) {
@@ -30,7 +30,11 @@ function UserCluster(name, keywords, graph) {
     }
 
     this.toJSON = function () {
-        return {name: this.name, keywords: this.keywords, cluster: this.graph.toJSON()};
+        return {
+            name: this.name,
+            keywords: Array.from(this.keywords),
+            cluster: this.graph.toJSON()
+        };
     }
     
     // Produces a json with nodes grouped by their old clusters

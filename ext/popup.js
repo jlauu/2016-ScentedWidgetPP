@@ -52,35 +52,71 @@ function draw() {
     var minimap = MiniSWPP.getInstance(config);
     minimap.start();
     drawTitle();
+    drawKeywords();
+}
+
+function drawKeywords() {
+    createInputBox('keywords', 'Add Keyword', function () {
+        var kw = d3.select('#keywords-input')[0][0].value;
+        cluster_data.keywords.push(kw);
+        addKeywords([kw]);
+        refreshKeywords();
+    });
+    refreshKeywords();
+}
+
+function refreshKeywords() {
+    d3.select('#keywords-list').selectAll('p')
+        .data(cluster_data.keywords, function (d) {return d;})
+      .enter()
+        .append('p')
+        .text(function(d) {return d;});
 }
 
 function drawTitle() {
-    var setTitle = function () {
+   var setTitle = function () {
         if (cluster_data.name.includes('_unnamed')) {
             return 'Untitled (Click to set)';
         } else {
             return cluster_data.name;
         }
+   };
+   var send = function () {
+        var name = d3.select('#cluster-title-input')[0][0].value;
+        chrome.runtime.sendMessage({
+            'type':'cluster_edit',
+            'name': cluster_data.name,
+            'new_name': name
+        });
+        cluster_data.name = name;
+        saveCluster();
     };
-    var box = d3.select('#cluster-title');
+    createInputBox('cluster-title', setTitle, send);
+}
+
+function createInputBox(id, title, callback) {
+    function clickhandler () {
+        callback();
+        d3.select('#'+id+'-input')
+            .attr('placeholder', cluster_data.name);
+    }
+    var box = d3.select('#'+id);
     var input = box.append('input')
+        .attr('id', id + '-input')
         .attr('inputmode', 'verbatim')
         .attr('maxlength', 20)
         .attr('pattern', '[a-zA-Z0-9._]')
         .attr('type', 'text')
-        .attr('placeholder', setTitle)
+        .attr('placeholder', title)
+        .on('keydown', function () {
+            if (d3.event.key == 'Enter') 
+                callback();
+        });
    var apply = box.append('button')
+        .attr('id', id + '-button')
         .attr('name','apply')
         .text('Apply')
-        .on('click', function () {
-            var name = input[0][0].value;
-            chrome.runtime.sendMessage({
-                'type':'cluster_edit',
-                'name': {'old':cluster_data.name,'new':name}
-            });
-            cluster_data.name = name;
-            saveClusterData();
-        });
+        .on('click', callback);
 }
 
 function setPopupSize(w, h) {
@@ -92,16 +128,26 @@ function setPopupSize(w, h) {
 function getClusterResponse(data, callback) {
     cluster_data = data;
     config.json = cluster_data.cluster;
-    saveClusterData();
+    saveCluster();
     callback();
 }
 
-function saveClusterData() {
+
+function saveCluster() {
     chrome.runtime.sendMessage({
         type:'register', 
         tab: config.tab,
-        cluster_id: cluster_data.name}
-    );
+        cluster_id: cluster_data.name
+    });
+}
+
+function addKeywords(kws) {
+    chrome.runtime.sendMessage({
+        type: 'cluster_edit',
+        edit_type: 'add',
+        name: cluster_data.name,
+        keywords: kws
+    });
 }
 
 main();

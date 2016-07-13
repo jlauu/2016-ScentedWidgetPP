@@ -55,23 +55,35 @@ text {
     line-height: 100px;
 }
 
-#cluster-title{
-    margin: auto;
+#menu {
+    width: 100%;
     height: 30px;
-    top: 0;
-    left: 0;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 12px;
+    overflow: hidden;
 }
 
-#urlbox li {
-    list-style-type: none;
+#cluster-title {
+    float: left;
 }
+
+#keywords {
+    right: 0px;
+    text-align: right;
+}
+
+#keywords-list {
+    right: 50px;
+    text-align: right;
+}
+
 
 </style>
 </head>
 <body>
-    <div id="cluster-title"></div>
+    <div id="menu">
+        <div id="cluster-title"></div>
+        <div id="keywords"></div>
+    </div>
+    <div id="keywords-list"></div>
     <div class="svg-container"></div>
 </body>
 </html>
