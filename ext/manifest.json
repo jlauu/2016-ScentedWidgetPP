@@ -7,7 +7,7 @@
   "background": {
       "persistent": true,
       "scripts": [
-          "utils.js",
+          "lib/url-min.js",
           "PageVisit.js",
           "BrowsingGraph.js",
           "UserCluster.js",
@@ -18,8 +18,9 @@
   },
   "content_scripts": [
       {
-        "matches": ["http://*/*","https://*/*"],
-        "js": ["jquery-1.12.1.min.js",
+        "matches": ["<all_urls>"],
+        "js": ["lib/url-min.js",
+               "lib/jquery-1.12.1.min.js",
                "sniffer.js"
         ]
       }
@@ -44,7 +45,6 @@
   "permissions": [
     "https://ajax.googleapis.com/",
     "https://swpp-server-stage.herokuapp.com/*",
-    "localhost:5000/*",
     "storage",
     "identity",
     "identity.email",

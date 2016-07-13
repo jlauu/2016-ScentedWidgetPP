@@ -16,13 +16,6 @@ function logUserBrowsingInteractions (request) {
     });
     if (pass_exclusions) {
         session.capture(type, request.event);
-        // Update Clusters
-        if (type == 'links') {
-            var results = clusters.getClustersByUrl(e.from);
-            if (results.length) {
-                clusters.addToCluster(results[0].name,[],[e]);
-            }
-        }
     }
 }
 
@@ -140,13 +133,16 @@ chrome.tabs.onRemoved.addListener(function (tabId) {
 chrome.tabs.onUpdated.addListener(function (tabId, info, tab) {
     var cluster = session.clusterOfTab(tabId);
     if (cluster && info.url) {
-        var url = SWPPUtils.normalizeUrl(info.url);
+        var url = URL(info.url);
+        url = url.host() + url.path() + url.queryString();
         // Check if we can make an edge based on last logged link
         var last = session.getLastLink();
         if (last && last.to == url) {
-                var links = [{from: SWPPUtils.normalizeUrl(last.from), to: last.to}];
+            var links = [{from: last.from, to: last.to}];
+            clusters.addToCluster(cluster, [], links);
+        } else {
+            clusters.addToCluster(cluster, [url], []);
         }
-        clusters.addToCluster(cluster, [url], links || []);
     }
 });
 

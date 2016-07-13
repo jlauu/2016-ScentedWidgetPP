@@ -11,31 +11,36 @@
    /*document.addEventListener('wheel', logInteraction, false);*/
    /*document.addEventListener('change', logInteraction, false);*/
 
-   // http://stackoverflow.com/questions/14780350/convert-relative-path-to-absolute-using-javascript
-   function absolutePath (href) {
-        var link = document.createElement("a");
-        link.href = href;
-        return link.host+link.pathname+link.search;
-   }
-   
    function mouseHandler (e) {
        var e = window.e || e;
-       if (e.target.tagName == 'A') {
-           logLinkClicked(e.target);
-       } else if (e.currentTarget.tagName == 'A') {
-           logLinkClicked(e);
+       var elem = e.target;
+       // Anchor tag
+       if (elem.tagName == 'A') {
+           logLinkClicked(elem.target);
+       // Image tage
+       } else if (elem.tagName == 'IMG' && elem.parentNode.tagName == 'A') {
+           logLinkClicked(elem.parentNode);
        }
    
        logInteraction(e);
    }
    
    function logLinkClicked (tgt) {
-       var from = document.URL;
-       var to = absolutePath(tgt.getAttribute("href"))
+       var from = URL(document.URL);
+       from = from.host() + from.path() + from.queryString();
+       var to = URL(URL.resolve(document.URL, tgt.href));
+       to = to.host() + to.path() + to.queryString();
        var time = Date.now();
+       var msg = {
+           'type': "capture-links", 
+           'event': {
+               'from': from, 
+               'to': to, 
+               'time': time
+           }
+       };
        // fixing relative paths    
-       chrome.runtime.sendMessage({type: "capture-links", 
-                                   event: {'from':from, 'to':to, 'time':time}});
+       chrome.runtime.sendMessage(msg);
        last_event = "capture-links";
    }
    
@@ -49,13 +54,14 @@
            return;
        }
        var time = Date.now();
-       var msg = {'type': "capture-interactions", 
-                  'event': {
-                     'event': type, 
-                     'url': url, 
-                     'target':  target.cloneNode(),
-                     'time' : time
-                   }
+       var msg = {
+           'type': "capture-interactions", 
+           'event': {
+                'event': type, 
+                'url': url, 
+                'target':  target.cloneNode(),
+                'time' : time
+           }
        };
        chrome.runtime.sendMessage(msg);
        last_event = type;

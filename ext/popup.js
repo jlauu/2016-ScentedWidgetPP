@@ -14,9 +14,8 @@ function main () {
     chrome.tabs.query({'active': true, 'currentWindow': true}, function (tabs) {
         if (tabs.length >= 0 && tabs[0].url) {
             config.tab = tabs[0];
-            var parser = document.createElement('a');
-            parser.href = tabs[0].url;
-            var url = parser.hostname + parser.pathname + parser.search;
+            var url = URL(tabs[0].url);
+            url = url.host() + url.path() + url.queryString();
             config.url = url;
             chrome.runtime.sendMessage({type: 'cluster_query', url: url}, function (response) {
                 if (response.jsons && response.jsons.length > 0) {
