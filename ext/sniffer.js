@@ -1,6 +1,4 @@
-// sniffer.js
-// content script - adds callback functions from our background page to
-// elements we are listening to.
+// sniffer.js - captures client-side events and dom interaction
 
 (function () {
    var last_event;
@@ -61,7 +59,7 @@
            'event': {
                 'event': type, 
                 'url': url, 
-                'target':  target.cloneNode(),
+                'target':  target.cloneNode().outerHTML,
                 'time' : time
            }
        };

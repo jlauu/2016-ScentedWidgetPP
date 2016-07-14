@@ -57,9 +57,12 @@ function draw() {
 
 function drawKeywords() {
     createInputBox('keywords', 'Add Keyword', function () {
-        var kw = d3.select('#keywords-input')[0][0].value;
-        cluster_data.keywords.push(kw);
-        addKeywords([kw]);
+        var kws = d3.select('#keywords-input')[0][0].value;
+        kws = kws.split(' ');
+        kws.forEach(function (kw) {
+            cluster_data.keywords.push(kw);
+        })
+        addKeywords(kws);
         refreshKeywords();
     });
     refreshKeywords();
