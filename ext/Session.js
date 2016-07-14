@@ -148,7 +148,8 @@ var Session = (function () {
             unload: unload,
             clearLogs: clearLogs,
             capture: capture,
-            sendJSON: sendJSON
+            sendJSON: sendJSON,
+            userID: function (d) {return userID;}
         };
     }
     return {

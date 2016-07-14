@@ -84,17 +84,7 @@ function drawTitle() {
             return cluster_data.name;
         }
    };
-   var send = function () {
-        var name = d3.select('#cluster-title-input')[0][0].value;
-        chrome.runtime.sendMessage({
-            'type':'cluster_edit',
-            'name': cluster_data.name,
-            'new_name': name
-        });
-        cluster_data.name = name;
-        saveCluster();
-    };
-    createInputBox('cluster-title', setTitle, send);
+   createInputBox('cluster-title', setTitle, editClusterName);
 }
 
 function createInputBox(id, title, callback) {
@@ -142,6 +132,17 @@ function saveCluster() {
         tab: config.tab,
         cluster_id: cluster_data.name
     });
+}
+
+function editClusterName() {
+    var name = d3.select('#cluster-title-input')[0][0].value;
+    chrome.runtime.sendMessage({
+        'type':'cluster_edit',
+        'name': cluster_data.name,
+        'new_name': name
+    });
+    cluster_data.name = name;
+    saveCluster();
 }
 
 function addKeywords(kws) {

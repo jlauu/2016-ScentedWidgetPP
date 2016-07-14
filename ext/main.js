@@ -47,6 +47,22 @@ function editCluster (request) {
     }
 }
 
+// Upload clusters. Uploads all if no name specified
+function uploadClusters (request) {
+    var names = request ? request.names : null;
+    var cs = clusters.getClusters();
+    if (names) {
+        cs = cs.filter(function (c) {return names.includes(c.name);});
+    }
+    cs.forEach(function (c) {
+        if (!c.name.includes(clusters.UNNAMED_PREFIX)) {
+            var json = c.toJSON();
+            json.userID = session.userID();
+            session.sendJSON('cluster', [json]);
+        }
+    });
+}
+
 // Registers a tab or window to a cluster
 function registerTabWindows (request) {
     var tab = request.tab;
@@ -66,6 +82,7 @@ messageHandlers[clusters.query_message_name] = queryClusters;
 messageHandlers[clusters.new_message_name] = newCluster;
 messageHandlers[clusters.edit_message_name] = editCluster;
 messageHandlers[session.register_message_name] = registerTabWindows;
+messageHandlers["upload_cluster"] = uploadClusters;
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.type.includes(session.capture_message_name)) {
@@ -156,8 +173,5 @@ chrome.tabs.onUpdated.addListener(function (tabId, info, tab) {
 // Save data to file before closing
 chrome.windows.onRemoved.addListener(function (windowId) {
     session.unload();
-    clusters.getClusters().forEach(function (c) {
-        if (!c.name.includes(clusters.UNNAMED_PREFIX))
-            session.sendJSON('cluster', c.toJSON());
-    });
+    uploadClusters();
 });
