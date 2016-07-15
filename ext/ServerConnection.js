@@ -1,5 +1,5 @@
 // Server.js - module for connecting with the webapp server
-var ServerManager = (function () {
+var ServerConnection = (function () {
     var webhost = 'swpp-server-stage.herokuapp.com';
 
     // Sends logged data for one capture type to the server as a json

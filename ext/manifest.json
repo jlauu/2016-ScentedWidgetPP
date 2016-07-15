@@ -10,11 +10,11 @@
           "lib/URI.js",
           "utils.js",
           "PageVisit.js",
-          "Server.js",
+          "ServerConnection.js",
           "BrowsingGraph.js",
           "UserCluster.js",
           "ClusterManager.js",
-          "Session.js",
+          "SessionManager.js",
           "omnibox.js",
           "main.js"
       ]

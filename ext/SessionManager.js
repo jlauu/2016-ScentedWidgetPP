@@ -2,7 +2,7 @@
 'use strict';
 
 // TODO: application-wide single-point-of-truth for types of items to be logged?
-var Session = (function () {
+var SessionManager = (function () {
     var instance;
     var INIT_MAX = 50;
     var userID;

@@ -1,12 +1,12 @@
 // main.js: top-level script that runs in background page
 'use strict';
 
-var session = Session.getInstance();
+var session = SessionManager.getInstance();
 var clusters = ClusterManager.getInstance();
 
 // Upload session logs when they reach capacity
 session.addMaxLogListener(function (json) {
-    ServerManager.sendJSON(json);
+    ServerConnection.sendJSON(json);
     return true;
 });
 
@@ -63,12 +63,14 @@ function uploadClusters (request) {
         cs = cs.filter(function (c) {return names.includes(c.name);});
     }
     var jsons = cs.filter(function (c) {
-        return c.name.includes(clusters.UNNAMED_PREFIX);
+        return !c.name.includes(clusters.UNNAMED_PREFIX);
     }).map(function (c) {
         var json = c.toJSON();
         json.userID = session.userID();
+        return json;
     });
-    ServerManager.sendJSON({type: 'cluster', data: jsons});
+    if (jsons) 
+        ServerConnection.sendJSON({type: 'cluster', data: jsons});
 }
 
 // Registers a tab or window to a cluster
@@ -182,7 +184,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, info, tab) {
 chrome.windows.onRemoved.addListener(function (windowId) {
     var logs = session.getAllLogJSON();
     logs.forEach(function (l) {
-        ServerManager.sendJSON(l);
+        ServerConnection.sendJSON(l);
     });
     uploadClusters();
 });
