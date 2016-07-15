@@ -23,7 +23,15 @@
 
     // Return a list of matched clusters
     obx.onInputChanged.addListener(function (text, suggest) {
-        var results = clusterMgr.getClusters().map(ClusterSuggest);
-        suggest(results);
+        if (text == 'all') {
+            var results = clusterMgr.getClusters().map(ClusterSuggest);
+            suggest(results);
+        } else {
+            suggest([]);
+        }
+    });
+
+    obx.onInputEntered.addListener(function (text, disposition) {
+       chrome.windows.create({url: 'popup.html?cluster='+text}); 
     });
 })();

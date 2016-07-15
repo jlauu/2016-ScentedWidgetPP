@@ -14,22 +14,34 @@ var config = {
 var cluster_data = null;
 
 function main () {
-    // Get current tab url
-    chrome.tabs.query({'active': true, 'currentWindow': true}, function (tabs) {
-        if (tabs.length >= 0 && tabs[0].url) {
-            config.tab = tabs[0];
-            var url = normalizeUrl(tabs[0].url);
-            config.url = url;
-            chrome.runtime.sendMessage({type: 'cluster_query', url: url}, function (response) {
-                if (response.jsons && response.jsons.length > 0) {
-                    getClusterResponse(response.jsons[0], draw);
-                } else {
-                    promptNewCluster();
-                }
-            });
-        }
-    });
+    var popup_url = URI(document.URL);
+    // Render from a request
+    if (popup_url.hasQuery('cluster')) {
+        var name = popup_url.query().split('=')[1];
+        chrome.runtime.sendMessage({type: 'cluster_query', name: name}, function (response) {
+            if (response.jsons && response.jsons.length > 0) {
+                getClusterResponse(response.jsons[0], draw);   
+            }
+        });
+    // Render view based on current tab url
+    } else {
+        chrome.tabs.query({'active': true, 'currentWindow': true}, function (tabs) {
+            if (tabs.length >= 0 && tabs[0].url) {
+                config.tab = tabs[0];
+                var url = normalizeUrl(tabs[0].url);
+                config.url = url;
+                chrome.runtime.sendMessage({type: 'cluster_query', url: url}, function (response) {
+                    if (response.jsons && response.jsons.length > 0) {
+                        getClusterResponse(response.jsons[0], draw);
+                    } else {
+                        promptNewCluster();
+                    }
+                });
+            }
+        });
+    }
 }
+
 // TODO: abstract to chrome background views?
 // Sets the popup view to new cluster dialogue
 function promptNewCluster() {

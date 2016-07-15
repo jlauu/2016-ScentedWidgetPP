@@ -16,11 +16,16 @@ function init(userID) {
         }
     }
 
-    // Handle queries to cluster manager
+    // Returns an array of cluster JSONs
     function queryClusters (request, sendResponse) {
-        var results = clusterMgr.getClustersByUrl(request.url);
-        results.map(function (c) {return c.toJSON();});
-        sendResponse({jsons: results});
+        if (request.url) {
+            var results = clusterMgr.getClustersByUrl(request.url);
+            results.map(function (c) {return c.toJSON();});
+            sendResponse({jsons: results});
+        } else if (request.name) {
+            var result = clusterMgr.get(request.name);
+            sendResponse({jsons: [result]});
+        }
     }
 
     // Requests a new cluster created
