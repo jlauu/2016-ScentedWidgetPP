@@ -1,6 +1,7 @@
 //omnibox.js - event handlers for omnibox
 (function () {
     var obx = chrome.omnibox;
+    var clusterMgr = ClusterManager.getInstance();
     
     function generateDescription(cluster) {
         var main = cluster.name;
@@ -22,7 +23,7 @@
 
     // Return a list of matched clusters
     obx.onInputChanged.addListener(function (text, suggest) {
-        var results = clusters.getClusters().map(ClusterSuggest);
+        var results = clusterMgr.getClusters().map(ClusterSuggest);
         suggest(results);
     });
 })();
