@@ -29,7 +29,7 @@
    
    function logLinkClicked (tgt) {
        var from = normalizeUrl(document.URL);
-       var to = normalizeUrl(URL.resolve(document.URL, tgt.href));
+       var to = normalizeUrl(tgt.href, document.URL);
        var time = Date.now();
        var msg = {
            'type': "capture-links", 

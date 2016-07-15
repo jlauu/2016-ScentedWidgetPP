@@ -7,7 +7,7 @@
   "background": {
       "persistent": true,
       "scripts": [
-          "lib/url-min.js",
+          "lib/URI.js",
           "utils.js",
           "PageVisit.js",
           "BrowsingGraph.js",
@@ -22,7 +22,7 @@
       {
         "matches": ["http://*/*", "https://*/*"],
         "js": [
-            "lib/url-min.js",
+            "lib/URI.js",
             "utils.js",
             "lib/jquery-1.12.1.min.js",
             "sniffer.js"
