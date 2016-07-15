@@ -6,7 +6,7 @@ var Session = (function () {
     var instance;
     var INIT_MAX = 50;
     var userID;
-    var webhost = 'swpp-server-stage.herokuapp.com';
+    var max_log_handler = function () {return false;};
 
     // Maintains a log and metadata for one type of event
     function Capture(type) {
@@ -42,34 +42,31 @@ var Session = (function () {
             var c = _captures[type];
             e['userID'] = userID ? userID : "";
             c.log.push(e);
-            if (c.log.length > c.MAX * (c.fails + 1)) {
-                sendJSON(type, c.log);
-                c.log = [];
+            if (c.log.length > (c.MAX * (c.fails+1))) {
+                if (max_log_handler(getLogJSON(c))) {
+                    c.log = [];
+                    c.fails = 0;
+                } else {
+                    c.fails++;
+                }
             }
+        }
+        
+        // Callback receives a json of the maxed log 
+        // and returns a boolean if it succeeded
+        function addMaxLogListener(handler) {
+            max_log_handler = handler;
         }
 
         // Sends logged data for one capture type to the server as a json
-        function sendJSON (type, data) {
-            var xhr = new XMLHttpRequest();
-            var json = JSON.stringify({'type':type, 'data':data});
-            xhr.open("POST", 'https://' + webhost + '/send', true);
-            xhr.setRequestHeader("Content-type", "application/json");
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState == 4 && xhr.status == 200) {
-                    console.log(xhr.responseText);
-                }
-            }
-            xhr.send(json);
+        function getLogJSON (capture) {
+            return {'type':capture.type, 'data':capture.log};
         }
 
         // Sends all logged data to the server
-        function unload () {
-            Object.keys(_captures).forEach(function (k) {
-               var c = _captures[k];
-               if (c.log.length > 0) {
-                   sendJSON(c.type, c.log);
-                   c.log = [];
-               }
+        function getAllLogJSON () {
+            return Object.keys(_captures).map(function (k) {
+                return getLogJSON(_captures[k]);
             });
         }
 
@@ -127,7 +124,6 @@ var Session = (function () {
             MAX_PAGEVISITS: max,
             MAX_LINKCLICKS: max,
             MAX_INTERACTIONS: max,
-            webhost: webhost,
             getLastLink: getLastLink,
             registerWindow: registerWindow,   
             registerTab: registerTab,
@@ -145,10 +141,11 @@ var Session = (function () {
             },
             clusterOfWindow: clusterOfWindow,
             clusterOfTab: clusterOfTab,
-            unload: unload,
             clearLogs: clearLogs,
+            getLogJSON: getLogJSON,
+            getAllLogJSON: getAllLogJSON,
+            addMaxLogListener: addMaxLogListener,
             capture: capture,
-            sendJSON: sendJSON,
             userID: function (d) {return userID;}
         };
     }

@@ -13,10 +13,8 @@ function UserCluster(name, keywords, graph) {
         this.graph.addLink(url_from, url_to);
     }
     
-    this.addKeywords = function (kws) {
-        kws.forEach(function (kw) {
-            this.keywords.add(kw); 
-        }, this);
+    this.addKeyword = function (kw) {
+        this.keywords.add(kw); 
     }
 
     this.removeKeywords = function (kws) {

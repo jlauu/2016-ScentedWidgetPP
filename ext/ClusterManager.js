@@ -39,7 +39,9 @@ var ClusterManager = (function () {
             links.forEach(function (link) {
                 c.addLink(link.from, link.to);
             });
-            c.addKeywords(keywords);
+            keywords.forEach(function (kw) {
+                c.addKeyword(kw);
+            });
         }
 
         function editName(old, new_) {

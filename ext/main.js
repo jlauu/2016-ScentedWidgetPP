@@ -4,6 +4,12 @@
 var session = Session.getInstance();
 var clusters = ClusterManager.getInstance();
 
+// Upload session logs when they reach capacity
+session.addMaxLogListener(function (json) {
+    ServerManager.sendJSON(json);
+    return true;
+});
+
 // Browsing Event handlers
 
 // Logs user clicks and input interactions
@@ -17,6 +23,8 @@ function logUserBrowsingInteractions (request) {
     if (pass_exclusions) {
         session.capture(type, request.event);
     }
+
+
 }
 
 // Handle queries to cluster manager
@@ -54,13 +62,13 @@ function uploadClusters (request) {
     if (names) {
         cs = cs.filter(function (c) {return names.includes(c.name);});
     }
-    cs.forEach(function (c) {
-        if (!c.name.includes(clusters.UNNAMED_PREFIX)) {
-            var json = c.toJSON();
-            json.userID = session.userID();
-            session.sendJSON('cluster', [json]);
-        }
+    var jsons = cs.filter(function (c) {
+        return c.name.includes(clusters.UNNAMED_PREFIX);
+    }).map(function (c) {
+        var json = c.toJSON();
+        json.userID = session.userID();
     });
+    ServerManager.sendJSON({type: 'cluster', data: jsons});
 }
 
 // Registers a tab or window to a cluster
@@ -163,15 +171,18 @@ chrome.tabs.onUpdated.addListener(function (tabId, info, tab) {
         var last = session.getLastLink();
         if (last && last.to == url) {
             var links = [{from: last.from, to: last.to}];
-            clusters.addToCluster(cluster, [], links);
+            clusters.addToCluster(cluster, [], links, []);
         } else {
-            clusters.addToCluster(cluster, [url], []);
+            clusters.addToCluster(cluster, [url], [], []);
         }
     }
 });
 
 // Save data to file before closing
 chrome.windows.onRemoved.addListener(function (windowId) {
-    session.unload();
+    var logs = session.getAllLogJSON();
+    logs.forEach(function (l) {
+        ServerManager.sendJSON(l);
+    });
     uploadClusters();
 });

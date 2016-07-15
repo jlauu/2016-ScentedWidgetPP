@@ -10,6 +10,7 @@
           "lib/URI.js",
           "utils.js",
           "PageVisit.js",
+          "Server.js",
           "BrowsingGraph.js",
           "UserCluster.js",
           "ClusterManager.js",
