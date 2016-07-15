@@ -3,7 +3,16 @@
 function UserCluster(name, keywords, graph) {
     this.name = name;
     this.keywords = new Set(keywords) || new Set();
-    this.graph = graph || new BrowsingGraph();
+    this.graph = new BrowsingGraph();
+
+    if (graph) {
+        graph.nodes.forEach(function (n) {
+            this.graph.addNode(n.url);
+        }, this);
+        graph.links.forEach(function (l) {
+            this.graph.addLink(l.source, l.target);
+        }, this);
+    }
 
     this.addUrl = function (url) {
         this.graph.addNode(url);

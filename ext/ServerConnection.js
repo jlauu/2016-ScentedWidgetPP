@@ -24,10 +24,10 @@ var ServerConnection = (function () {
         xhr.setRequestHeader("Content-type", "application/json");
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4 && xhr.status == 200) {
-                console.log(xhr.responseText);
+                callback(JSON.parse(xhr.responseText));
             }
         }
-        xhr.send(json);
+        xhr.send();
     }
 
     return {

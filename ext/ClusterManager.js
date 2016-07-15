@@ -6,8 +6,7 @@ var ClusterManager = (function () {
     var NEW_MSG = 'cluster_new';
     var EDIT_MSG = 'cluster_edit';
     var UNNAMED_PREFIX = '_unnamed';
-    function init(id) {
-        var userid = id;
+    function init() {
         var clusters = new Map();
         var uname_id = 0;
 
@@ -56,6 +55,13 @@ var ClusterManager = (function () {
         function getClustersByUrl(url) {
             return getClusters().filter(function (c) {return c.hasUrl(url);});
         }
+
+        // Loads a cluster from json
+        function loadJSON(json) {
+            var cluster = new UserCluster(json.name, json.keywords, json.graph);
+            clusters.set(cluster.name, cluster);
+        }
+
         return {
             UNNAMED_PREFIX: UNNAMED_PREFIX,
             query_message_name: QUERY_MSG,
@@ -63,6 +69,7 @@ var ClusterManager = (function () {
             edit_message_name: EDIT_MSG,
             mkCluster: mkCluster,
             addToCluster: addToCluster,
+            loadJSON: loadJSON,
             get: get,
             getClusters: getClusters,
             getClustersByUrl: getClustersByUrl,
@@ -71,9 +78,9 @@ var ClusterManager = (function () {
     }
 
     return {
-        getInstance: function(userid) {
+        getInstance: function() {
             if (!instance) {
-                instance = init(userid);
+                instance = init();
             }
             return instance;
         }
