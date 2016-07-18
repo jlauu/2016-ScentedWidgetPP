@@ -33,6 +33,14 @@ var SWPP = (function (window) {
         return links;
     }
     
+    module.getWidth = function () {
+        return svg.attr('width');
+    };
+
+    module.getHeight = function () {
+        return svg.attr('height');
+    };
+
     // Start/initialize d3's force layout
     module.init = function (cfg) {
         module.config = cfg;
