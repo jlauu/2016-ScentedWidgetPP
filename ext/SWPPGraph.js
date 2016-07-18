@@ -5,9 +5,9 @@ var SWPP = (function (window) {
         graph: null, // the processed graph json
         data: null, // the original data json
         config: null // the original data and other options
-        width = null,
-        height = null,
     },
+    width = null,
+    height = null,
     force = null,
     // Cached d3 selections
     links = null,
