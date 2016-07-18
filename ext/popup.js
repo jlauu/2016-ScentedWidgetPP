@@ -20,6 +20,7 @@ function main () {
         var name = popup_url.query().split('=')[1];
         chrome.runtime.sendMessage({type: 'cluster_query', name: name}, function (response) {
             if (response.jsons && response.jsons.length > 0) {
+                setPopupSize('auto', 'auto');
                 getClusterResponse(response.jsons[0], draw);   
             }
         });
@@ -32,6 +33,7 @@ function main () {
                 config.url = url;
                 chrome.runtime.sendMessage({type: 'cluster_query', url: url}, function (response) {
                     if (response.jsons && response.jsons.length > 0) {
+                        setPopupSize(600,500);
                         getClusterResponse(response.jsons[0], draw);
                     } else {
                         promptNewCluster();
@@ -53,6 +55,7 @@ function promptNewCluster() {
             chrome.runtime.sendMessage({type: 'cluster_new', url: config.url}, 
                 function (response) {
                     d3.select('#create-cluster').remove();
+                    setPopupSize(600,500);
                     getClusterResponse(response.json, draw);
                 });
         });
@@ -60,9 +63,7 @@ function promptNewCluster() {
 
 // Expects config.json to be defined
 function draw() {
-    setPopupSize(600,500);
-    var minimap = MiniSWPP.getInstance(config);
-    minimap.start();
+    SWPP.init(config);
     drawTitle();
     drawKeywords();
 }
