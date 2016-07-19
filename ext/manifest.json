@@ -26,7 +26,8 @@
             "lib/URI.js",
             "utils.js",
             "lib/jquery-1.12.1.min.js",
-            "sniffer.js"
+            "sniffer.js",
+            "domcapture.js"
         ]
       }
   ],
