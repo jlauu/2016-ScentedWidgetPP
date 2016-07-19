@@ -167,6 +167,11 @@ var SWPP = (function (window) {
         graph.links = fixLinkReferences (config);
         return graph;
     }
+
+    module.delete = function () {
+        force.stop();
+        d3.selectAll('svg *').remove();
+    };
     
     return module;
 })(window);

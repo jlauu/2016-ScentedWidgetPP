@@ -24,7 +24,15 @@ function init(userID) {
             sendResponse({jsons: results});
         } else if (request.name) {
             var result = clusterMgr.get(request.name);
+            sendResponse({jsons: [result.toJSON()]});
+        } else if (request.combine) {
+            var result = clusterMgr.getCombined();
+            console.log(result);
             sendResponse({jsons: [result]});
+        } else {
+            var results = clusterMgr.getClusters();
+            results.map(function (c) {return c.toJSON();});
+            sendResponse({jsons: results}); 
         }
     }
 

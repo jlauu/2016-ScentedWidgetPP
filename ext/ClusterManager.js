@@ -14,6 +14,16 @@ var ClusterManager = (function () {
             return Array.from(clusters.values());
         } 
 
+        function getCombined() {
+            var cs = getClusters();
+            var c = cs.pop();
+            if (cs.length) {
+                return c.mergeJSON(cs);
+            } else {
+                return c.toJSON();
+            }
+        }
+
         function mkCluster(name, url) {
             if (!name) {
                 name = UNNAMED_PREFIX + uname_id.toString();
@@ -27,6 +37,10 @@ var ClusterManager = (function () {
 
         function get(name) {
             return clusters.get(name);
+        }
+
+        function has(name) {
+            return clusters.has(name);
         }
 
         function addToCluster(name, urls, links, keywords) {
@@ -71,7 +85,9 @@ var ClusterManager = (function () {
             addToCluster: addToCluster,
             loadJSON: loadJSON,
             get: get,
+            has: has,
             getClusters: getClusters,
+            getCombined: getCombined,
             getClustersByUrl: getClustersByUrl,
             editName: editName
         }

@@ -10,33 +10,88 @@ function BrowsingGraph() {
     var _d3links = [];
     var _d3groups = [0];
     var id = 0;
+
+    Array.prototype.copy = function () {
+        var copy = new Array();
+        this.forEach(function (elem) {
+            copy.push(elem); 
+        });
+        return copy;
+    }
+
+    this.getNodes = function () {
+        return _d3nodes.copy();
+    }
+
+    this.getLinks = function () {
+        return _d3links.copy();
+    }
+
+    this.getGroups = function () {
+        return _d3groups.copy();
+    }
     
     this.toJSON = function() {
-        return {nodes : _d3nodes, links : _d3links, groups : _d3groups};
+        return {
+            nodes: this.getNodes(), 
+            links: this.getLinks(),
+            groups: this.getGroups()}
+        ;
     }
 
     // Produces a json with nodes grouped by their old graphs
-    this.mergeJSON = function(graph) {
+    this.mergeJSON = function(graphs) {
+        graphs.push(this);
+        var new_groups = new Map();
+        graphs.forEach(function (g) {
+            new_groups.set(g, new Map());
+        });
+        var g_ids = new Set();
         var new_id = 0;
         var _utoi = new Map();
-        var nodes = Array.from(this.urls).map(function (url) {
-            _utoi.set(url, new_id);
-            return {url: url, id: new_id++, group: 0};
+        
+        // Make unique group ids
+        graphs.forEach(function (g) {
+            var groups = new_groups.get(g);
+            g.getGroups().forEach(function (g_id) {
+                var key = 0;
+                while (g_ids.has(key)) {
+                    key++;
+                }
+                g_ids.add(key);
+                groups.set(g_id, key);
+            });
         });
-        Array.from(graph.urls).forEach(function (url) {
-            _utoi.set(url, new_id);
-            nodes.push({url: url, id: new_id++, group: 1});
+
+        // Rebuild nodes and ids
+        var nodes = [];
+        graphs.forEach(function (g) {
+            g.getNodes().forEach(function (n) {
+                _utoi.set(n.url, new_id);
+                var group = new_groups.get(g).get(n.group);
+                nodes.push({
+                    url: n.url, 
+                    id: new_id++, 
+                    group: group
+                });
+            });
         });
-        var addLinkFunc = function (graph) {
-            return function (l) {
-                var s = _utoi.get(graph.itou.get(l.source));
-                var t = _utoi.get(graph.itou.get(l.source));
-                return {source: s, target: t, value: 1};
-            };
-        };
-        var links = this._d3links.map(addLinkFunc(this));
-        links.concat(graph._d3links.map(addLinkFunc(graph)));
-        return {nodes: nodes, links: links, groups: [0,1]};
+
+        // Rebuild links and ids
+        var links = [];
+        graphs.forEach(function (g) {
+            g.getLinks().forEach(function (l) {
+                var s = _utoi.get(g.itou.get(l.source));
+                var t = _utoi.get(g.itou.get(l.target));
+                links.push({
+                    source: s,
+                    target: t,
+                    value: 1
+                });
+            });
+        });
+
+        return {groups: Array.from(g_ids), nodes: nodes, links: links};
     }
 
     this.addNode = function(url) {

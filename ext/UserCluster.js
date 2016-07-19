@@ -51,10 +51,17 @@ function UserCluster(name, keywords, graph) {
     }
     
     // Produces a json with nodes grouped by their old clusters
-    this.mergeJSON = function (cluster) {
-        var name = this.name + "-" + cluster.name;
-        var keywords = Array.from(new Set(this.keywords.concat(cluster.name)));
-        var graph = this.graph.mergeJSON(cluster.graph);
+    this.mergeJSON = function (clusters) {
+        clusters.push(this);
+        var name = clusters.map(function(c){return c.name;}).join('-');
+        var keywords = new Set();
+        clusters.forEach(function (c) {
+            c.keywords.forEach(function (k) {
+                keywords.add(k);
+            });
+        });
+        clusters.pop();
+        var graph = this.graph.mergeJSON(clusters.map(function (c) {return c.graph;}));
         return {name: name, keywords: keywords, cluster: graph};
     }
 }

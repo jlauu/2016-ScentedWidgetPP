@@ -23,7 +23,7 @@
 
     // Return a list of matched clusters
     obx.onInputChanged.addListener(function (text, suggest) {
-        if (text == 'all') {
+        if (text == 'ALL') {
             var results = clusterMgr.getClusters().map(ClusterSuggest);
             suggest(results);
         } else {
@@ -32,6 +32,10 @@
     });
 
     obx.onInputEntered.addListener(function (text, disposition) {
-       chrome.windows.create({url: 'popup.html?cluster='+text}); 
+       if (text == 'ALL') {
+           chrome.windows.create({url: 'fullview.html'});
+       } else if (clusterMgr.has(text)) {
+           chrome.windows.create({url: 'popup.html?cluster='+text}); 
+       }
     });
 })();
