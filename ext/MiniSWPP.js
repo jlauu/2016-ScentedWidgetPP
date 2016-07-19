@@ -1,7 +1,9 @@
 // MiniSWPP.js - Extends base graph with popup-specific layout/behavior
 var SWPP = (function (SWPP) {
     // Extend with interaction
+    var super_preStart = SWPP.preStart;
     SWPP.preStart = function (force, svg, nodes, links) {
+        super_preStart(force,svg,nodes,links);
         nodes
         // Go to url in current tab
         .on("dblclick", function (d) {

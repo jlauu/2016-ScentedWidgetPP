@@ -1,0 +1,51 @@
+<html>
+<head>
+<title>SWPP - Graph Display</title>
+<script src="lib/URI.js" charset="utf-8"></script>
+<script src="lib/d3.v3.min.js" charset="utf-8"></script>
+<script src="utils.js"></script>
+<script src="SWPPGraph.js"></script>
+<script src="MiniSWPP.js"></script>
+<script src="MultiSWPP.js"></script>
+<script src="fullview.js"></script>
+<style>
+path.link {
+  fill: none;
+  stroke: #666;
+  stroke-width: 1.5px;
+}
+
+circle {
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+text {
+  fill: #000;
+  font: 10px sans-serif;
+}
+
+.svg-container {
+    position: fixed;
+    top: 30px;
+    width: 100%;
+    height: 100%;
+    vertical-align: top;
+    overflow: hidden;
+}
+
+.svg-content-responsive {
+    display: inline-block;
+    position: absolute;
+    top: 10px;
+    left: 0;
+}
+
+
+</style>
+</head>
+<body>
+    <div id="cluster-title"></div>
+    <div class="svg-container"></div>
+</body>
+</html>

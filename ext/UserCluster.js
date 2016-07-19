@@ -43,25 +43,50 @@ function UserCluster(name, keywords, graph) {
     }
 
     this.toJSON = function () {
+        var cluster = this.graph.toJSON();
+        cluster.nodes.forEach(function (n) {n.cluster = this.name;}, this);
         return {
             name: this.name,
             keywords: Array.from(this.keywords),
-            cluster: this.graph.toJSON()
+            graph: cluster
         };
     }
     
-    // Produces a json with nodes grouped by their old clusters
+    // Returns a combined json graph with fields
+    // name: joined names of clusters
+    // keywords: map of cluster name -> keyword array
+    // graph: combined graph object with nodes assigned a group id 
+    // clusters: map of group id -> cluster name
     this.mergeJSON = function (clusters) {
         clusters.push(this);
-        var name = clusters.map(function(c){return c.name;}).join('-');
-        var keywords = new Set();
+        var names = clusters.map(function(c){return c.name;})
+        var name = names.join('-');
+        var keywords = {}; 
         clusters.forEach(function (c) {
             c.keywords.forEach(function (k) {
-                keywords.add(k);
+                if (keywords[c.name]) {
+                    keywords[c.name].push(k);
+                } else {
+                    keywords[c.name] = [k];
+                }
             });
         });
         clusters.pop();
         var graph = this.graph.mergeJSON(clusters.map(function (c) {return c.graph;}));
-        return {name: name, keywords: keywords, cluster: graph};
+        clusters.push(this);
+        // Build map for group id to cluster name
+        names = new Set(names);
+        var groupToCluster = {};
+        for (var i = 0; i < graph.nodes.length; i++ ) {
+            if (names.size == 0) break;
+            var c = clusters.find(function (c) {
+                return c.hasUrl(graph.nodes[i].url);
+            });
+            if (names.has(c.name)) {
+                groupToCluster[graph.nodes[i].group] = c.name;
+                names.delete(c.name);
+            }
+        }
+        return {name: name, keywords: keywords, graph: graph, clusters: groupToCluster};
     }
 }

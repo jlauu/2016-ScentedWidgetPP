@@ -133,7 +133,7 @@ function setPopupSize(w, h) {
 // Sets the config and cluster_data
 function getClusterResponse(data, callback) {
     cluster_data = data;
-    config.json = cluster_data.cluster;
+    config.json = cluster_data.graph;
     saveCluster();
     callback();
 }

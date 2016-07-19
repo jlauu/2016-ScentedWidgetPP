@@ -9,7 +9,7 @@ function init(userID) {
         var type = request.type.substr(sessionMgr.capture_message_name.length);
         var e = request.event;
         var pass_exclusions = ['from', 'to', 'url'].every(function (url) {
-                return !e['url'] || !e['url'].includes(sessionMgr.webhost);
+                return !e[url] || !e[url].includes(sessionMgr.webhost);
         });
         if (pass_exclusions) {
             sessionMgr.capture(type, request.event);
@@ -20,20 +20,25 @@ function init(userID) {
     function queryClusters (request, sendResponse) {
         if (request.url) {
             var results = clusterMgr.getClustersByUrl(request.url);
-            results.map(function (c) {return c.toJSON();});
+            results = results.map(function (c) {return c.toJSON();});
             sendResponse({jsons: results});
         } else if (request.name) {
             var result = clusterMgr.get(request.name);
             sendResponse({jsons: [result.toJSON()]});
         } else if (request.combine) {
             var result = clusterMgr.getCombined();
-            console.log(result);
             sendResponse({jsons: [result]});
         } else {
             var results = clusterMgr.getClusters();
-            results.map(function (c) {return c.toJSON();});
+            results = results.map(function (c) {return c.toJSON();});
             sendResponse({jsons: results}); 
         }
+    }
+
+    // Returns an array of cluster names
+    function queryClusterNames (request, sendResponse) {
+        var results = clusterMgr.getClusters();
+        sendResponse({names: results.map(function(c) {return c.name;})});
     }
 
     // Requests a new cluster created
