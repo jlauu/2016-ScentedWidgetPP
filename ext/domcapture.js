@@ -53,9 +53,10 @@ var UNDOREDO = (function () {
         cur: 0,
         add: function (elem) {
             this.cur++;
-            this.stack.push(elem);
+            this.stack.splice(this.cur, this.stack.length-this.cur, elem);
         },
         next: function () {
+            console.log(this.cur + '/' + this.stack.length);
             if (this.cur < this.stack.length) {
                 return this.stack[this.cur++];
             } else {
@@ -63,6 +64,7 @@ var UNDOREDO = (function () {
             }
         },
         prev: function () {
+            console.log(this.cur + '/' + this.stack.length);
             if (this.cur >= 0) {
                 return this.stack[--this.cur];
             } else {
