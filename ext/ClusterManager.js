@@ -6,6 +6,7 @@ var ClusterManager = (function () {
     var NEW_MSG = 'cluster_new';
     var EDIT_MSG = 'cluster_edit';
     var UNNAMED_PREFIX = '_unnamed';
+    var EXCLUDED_URLS = ['newtab/, chrome://newtab/'];
     function init() {
         var clusters = new Map();
         var uname_id = 0;
@@ -46,10 +47,12 @@ var ClusterManager = (function () {
         function addToCluster(name, urls, links, keywords) {
             var c = get(name);
             urls.forEach(function (url) {
+                if (EXCLUDED_URLS.includes(url)) return;
                 c.addUrl(url);
             });
 
             links.forEach(function (link) {
+                if (EXCLUDED_URLS.includes(link.from) || EXCLUDED_URLS.includes(link.to)) return;
                 c.addLink(link.from, link.to);
             });
             keywords.forEach(function (kw) {

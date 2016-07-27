@@ -88,7 +88,11 @@ var SessionManager = (function () {
             if (clusterId) {
                 tabClusters.set(tab.id, clusterId);
             } else if (tab.openerTabId && clusterOfTab(tab.openerTabId)) {
-                tabClusters.set(tab.id, clusterOfTab(tab.openerTabId));
+                if (tab.url == 'chrome://newtab/') {
+                    tabClusters.set(tab.id, null);
+                } else {
+                    tabClusters.set(tab.id, clusterOfTab(tab.openerTabId));
+                }
             } else if (clusterOfWindow(tab.windowId)) {
                 tabClusters.set(tab.id, clusterOfWindow(tab.windowId));
             } else {
