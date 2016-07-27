@@ -18,6 +18,7 @@ function main () {
     // Render from a request
     if (popup_url.hasQuery('cluster')) {
         var name = popup_url.query().split('=')[1];
+        name = decodeURIComponent(name);
         chrome.runtime.sendMessage({type: 'cluster_query', name: name}, function (response) {
             if (response.jsons && response.jsons.length > 0) {
                 setPopupSize('auto', 'auto');

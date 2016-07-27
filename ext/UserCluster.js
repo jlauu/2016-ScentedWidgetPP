@@ -4,7 +4,6 @@
 function UserCluster(name, keywords, graph) {
     this.name = name;
     this.keywords = new Set(keywords) || new Set();
-    this.keywords.add(name);
     this.graph = new BrowsingGraph();
 
     if (graph) {
@@ -47,7 +46,9 @@ function UserCluster(name, keywords, graph) {
 	};
 
     this.getKeywords = function () {
-        return Array.from(this.keywords);
+        var kws = Array.from(this.keywords);
+        kws.push(this.name);
+        return kws;
     };
     
     this.addKeyword = function (kw) {

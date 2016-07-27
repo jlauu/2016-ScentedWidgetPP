@@ -23,8 +23,7 @@ function init(userID) {
             results = results.map(function (c) {return c.toJSON();});
             sendResponse({jsons: results});
         } else if (request.name) {
-            var name = decodeURIComponent(request.name); 
-            var result = clusterMgr.get(name);
+            var result = clusterMgr.get(request.name);
             sendResponse({jsons: [result.toJSON()]});
         } else if (request.combine) {
             var result = clusterMgr.getCombined();

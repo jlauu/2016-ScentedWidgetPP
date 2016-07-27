@@ -111,6 +111,7 @@ var ClusterManager = (function () {
             edit_message_name: EDIT_MSG,
             mkCluster: mkCluster,
             addToCluster: addToCluster,
+            removeFromCluster: removeFromCluster,
             loadJSON: loadJSON,
             get: get,
             has: has,

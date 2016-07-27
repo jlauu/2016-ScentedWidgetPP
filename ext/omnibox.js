@@ -2,6 +2,7 @@
 (function () {
     var obx = chrome.omnibox;
     var clusterMgr = ClusterManager.getInstance();
+    var sessionMgr = SessionManager.getInstance();
     
     function generateDescription(cluster) {
         var main = cluster.name;
@@ -17,13 +18,11 @@
         };
     }
 
-    obx.setDefaultSuggestion({
-        description: "Search for clusters"
-    });
 
     // Return a list of matched clusters
     obx.onInputChanged.addListener(function (text, suggest) {
         if (text == 'ALL') {
+            obx.setDefaultSuggestion({description: "Search for clusters"});
             var results = clusterMgr.getClusters().map(function (r) {
                     return ClusterSuggest(r);
             });
@@ -39,6 +38,7 @@
             });
             suggest(results);
         } else {
+            obx.setDefaultSuggestion({description: "Search for clusters"});
             var results = clusterMgr.getClusters().filter(function (c) {
                 return c.getKeywords().map(function (kw) {
                     return kw.toLowerCase();
@@ -63,12 +63,9 @@
            chrome.tabs.getSelected(function (tab) {
                var url = normalizeUrl(tab.url);
                var cluster = clusterMgr.getClustersByUrl(url)[0];
-               cluster.removeUrl(url);
-               chrome.runtime.sendMessage({
-                   type: SessionManager.register_message_name,
-                   tab: tab,
-                   cluster_id: null
-               });
+               if (!cluster) return;
+               clusterMgr.removeFromCluster(cluster.name, [url]);
+               sessionMgr.unregisterTab(tab.id);
            });
        } else if (clusterMgr.has(text)) {
            chrome.windows.create({url: 'popup.html?cluster='+text}); 
