@@ -1,6 +1,6 @@
 // sniffer.js - captures client-side events and dom interaction
 
-(function () {
+var Sniffer = (function () {
    var last_event;
    document.addEventListener('click', mouseHandler, false);
    document.addEventListener('dblclick', mouseHandler, false);
@@ -8,6 +8,17 @@
    /*document.addEventListener('scroll', logInteraction, false);*/
    /*document.addEventListener('wheel', logInteraction, false);*/
    /*document.addEventListener('change', logInteraction, false);*/
+    var snifferCaptureEvent = {
+        callbacks: [],
+        dispatch: function (e) {
+            this.callbacks.forEach(function (c) {
+                c(e);
+            });
+        },
+        addListener: function (callback) {
+            this.callbacks.push(callback);   
+        }
+    }
 
    function mouseHandler (e) {
        var e = window.e || e;
@@ -41,6 +52,7 @@
        };
        // fixing relative paths    
        chrome.runtime.sendMessage(msg);
+       snifferCaptureEvent.dispatch(msg.event);
        last_event = "capture-links";
    }
    
@@ -54,6 +66,7 @@
            return;
        }
        var time = Date.now();
+       snifferCaptureEvent.dispatch({'event': type, 'target': target});
        var msg = {
            'type': "capture-interactions", 
            'event': {
@@ -66,4 +79,8 @@
        chrome.runtime.sendMessage(msg);
        last_event = type;
    }
+
+    return {
+        onSnifferCapture: snifferCaptureEvent
+    };
 }());

@@ -5,6 +5,5 @@ data/
 .main.js.promises
 bin/
 include/
-lib/
 pip-selfcheck.json
 *.backup
