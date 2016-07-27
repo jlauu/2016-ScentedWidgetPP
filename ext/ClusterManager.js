@@ -6,7 +6,6 @@ var ClusterManager = (function () {
     var NEW_MSG = 'cluster_new';
     var EDIT_MSG = 'cluster_edit';
     var UNNAMED_PREFIX = '_unnamed';
-    var EXCLUDED_URLS = ['newtab/, chrome://newtab/'];
     function init() {
         var clusters = new Map();
         var uname_id = 0;
@@ -46,18 +45,44 @@ var ClusterManager = (function () {
 
         function addToCluster(name, urls, links, keywords) {
             var c = get(name);
-            urls.forEach(function (url) {
-                if (EXCLUDED_URLS.includes(url)) return;
-                c.addUrl(url);
-            });
+            if (urls) {
+                urls.forEach(function (url) {
+                    c.addUrl(url);
+                });
+            }
+            if (links) {
+                links.forEach(function (link) {
+                    c.addLink(link.from, link.to);
+                });
+            }
+            if (keywords) {
+                keywords.forEach(function (kw) {
+                    c.addKeyword(kw);
+                });
+            }
+        }
 
-            links.forEach(function (link) {
-                if (EXCLUDED_URLS.includes(link.from) || EXCLUDED_URLS.includes(link.to)) return;
-                c.addLink(link.from, link.to);
-            });
-            keywords.forEach(function (kw) {
-                c.addKeyword(kw);
-            });
+        function removeFromCluster(name, urls, links, keywords) {
+            var c = get(name);
+            if (urls) {
+                urls.forEach(function (url) {
+                    c.removeUrl(url);
+                });
+            }
+            if (links) {
+                links.forEach(function (link) {
+                    c.removeLink(link.from, link.to);
+                });
+            }
+            if (keywords) {
+                keywords.forEach(function (kw) {
+                    c.removeKeyword(kw);
+                });
+            }
+
+            if (c.getUrls.length <= 0) {
+                clusters.delete(c.name);
+            }
         }
 
         function editName(old, new_) {

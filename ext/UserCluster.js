@@ -1,8 +1,10 @@
 'use strict';
 
+// TODO: inherit from BrowsingGraph
 function UserCluster(name, keywords, graph) {
     this.name = name;
     this.keywords = new Set(keywords) || new Set();
+    this.keywords.add(name);
     this.graph = new BrowsingGraph();
 
     if (graph) {
@@ -20,27 +22,43 @@ function UserCluster(name, keywords, graph) {
         }, this);
     }
 
+    this.getUrls = function () {
+        return this.graph.getUrls();
+    };
+
     this.addUrl = function (url) {
         this.graph.addNode(url);
-    }
+    };
 
-    this.addLink = function(url_from, url_to) {
-        this.graph.addLink(url_from, url_to);
-    }
+    this.hasUrl = function (url) {
+	    return this.graph.urls.has(url);
+	};
+
+    this.removeUrl = function (url) {
+        this.graph.removeNode(url);
+	};
+
+    this.addLink = function (from, to) {
+        this.graph.addLink(from, to);
+	};
+
+    this.removeLink = function (from, to) {
+		this.graph.removeLink(from, to);
+	};
+
+    this.getKeywords = function () {
+        return Array.from(this.keywords);
+    };
     
     this.addKeyword = function (kw) {
         this.keywords.add(kw); 
-    }
+    };
 
     this.removeKeywords = function (kws) {
         kws.forEach(function (kw) {
             this.keywords.delete(kw);
         }, this);
-    }
-
-    this.hasUrl = function (url) {
-        return this.graph.urls.has(url);
-    }
+    };
 
     this.toJSON = function () {
         var cluster = this.graph.toJSON();
@@ -50,7 +68,7 @@ function UserCluster(name, keywords, graph) {
             keywords: Array.from(this.keywords),
             graph: cluster
         };
-    }
+    };
     
     // Returns a combined json graph with fields
     // name: joined names of clusters
@@ -88,5 +106,5 @@ function UserCluster(name, keywords, graph) {
             }
         }
         return {name: name, keywords: keywords, graph: graph, clusters: groupToCluster};
-    }
+    };
 }

@@ -5,6 +5,8 @@
 var SessionManager = (function () {
     var instance;
     var INIT_MAX = 50;
+    var CAPTURE_MSG_PREFIX = 'capture-';
+    var REGISTER_MSG = 'register';
     var max_log_handler = function () {return false;};
 
     // Maintains a log and metadata for one type of event
@@ -18,8 +20,6 @@ var SessionManager = (function () {
     function init(id) {
         //  private
         var userID = id;
-        var CAPTURE_MSG_PREFIX = 'capture-';
-        var REGISTER_MSG = 'register';
         var capture_types = ['links','pages','interactions'];
         var _captures = {};
         var max = 50;
@@ -157,6 +157,8 @@ var SessionManager = (function () {
                 instance = init(userID);
             }
             return instance;
-        }
+        },
+        capture_message_name: CAPTURE_MSG_PREFIX,
+        register_message_name: REGISTER_MSG,
     };
 })();

@@ -56,6 +56,11 @@ function promptNewCluster() {
                 function (response) {
                     d3.select('#create-cluster').remove();
                     setPopupSize(600,500);
+                    chrome.runtime.sendMessage({
+                        type: 'register',
+                        tab: config.tab,
+                        cluster_id: response.json.name
+                    });
                     getClusterResponse(response.json, draw);
                 });
         });
@@ -134,17 +139,7 @@ function setPopupSize(w, h) {
 function getClusterResponse(data, callback) {
     cluster_data = data;
     config.json = cluster_data.graph;
-    saveCluster();
     callback();
-}
-
-
-function saveCluster() {
-    chrome.runtime.sendMessage({
-        type:'register', 
-        tab: config.tab,
-        cluster_id: cluster_data.name
-    });
 }
 
 function editClusterName() {
@@ -155,7 +150,6 @@ function editClusterName() {
         'new_name': name
     });
     cluster_data.name = name;
-    saveCluster();
 }
 
 function addKeywords(kws) {

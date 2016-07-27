@@ -6,8 +6,6 @@ function BrowsingGraph() {
     this.adj = new Map(); // id -> [id]
     this.utoi = new Map(); // url -> id
     this.itou = new Map(); // id -> url
-    var _d3nodes = [];
-    var _d3links = [];
     var _d3groups = [0];
     var id = 0;
 
@@ -19,25 +17,74 @@ function BrowsingGraph() {
         return copy;
     }
 
-    this.getNodes = function () {
-        return _d3nodes.copy();
+    this.getUrls = function () {
+        return Array.from(this.urls).copy();
     }
 
+    this.getNodes = function () {
+        return Array.from(this.itou.entries()).map(function (kv) {
+            return {id: kv[0], url: kv[1], group: 0};
+        });
+    };
+
     this.getLinks = function () {
-        return _d3links.copy();
-    }
+        var links = [];
+        this.adj.forEach(function (ts, s) {
+            ts.forEach(function (t) {
+                links.push({source: s, target: t, value: 1});
+            });
+        });
+        return links;
+    };
 
     this.getGroups = function () {
         return _d3groups.copy();
-    }
+    };
     
     this.toJSON = function() {
         return {
             nodes: this.getNodes(), 
             links: this.getLinks(),
-            groups: this.getGroups()}
-        ;
-    }
+            groups: this.getGroups()
+        };
+    };
+
+    this.addNode = function(url) {
+        if (!this.urls.has(url)) {
+            this.urls.add(url);
+            this.utoi.set(url,id);
+            this.itou.set(id, url);
+            id++;
+        }
+    };
+
+    this.addLink = function(url_from, url_to) {
+        this.addNode(url_from);
+        this.addNode(url_to);
+        var src = this.utoi.get(url_from);
+        var dest = this.utoi.get(url_to);
+        if (!this.adj.has(src)) {
+            this.adj.set(src, new Set([dest]))
+        } else {
+            this.adj.get(src).add(dest);
+        }
+    };
+
+    this.removeNode = function (url) {
+        this.adj.delete(this.utoi.get(url));
+        this.itou.delete(this.utoi.get(url));
+        this.utoi.delete(url);
+        this.urls.delete(url);
+    };
+
+    this.removeLink = function (from, to) {
+        var f = this.utoi.get(from);
+        var t = this.utoi.get(to);
+        var newval = this.adj.get(f).filter(function (i) {
+            return i != t;
+        });
+        this.adj.set(f, newval);
+     };
 
     // Produces a json with nodes grouped by their old graphs
     this.mergeJSON = function(graphs) {
@@ -92,33 +139,5 @@ function BrowsingGraph() {
         });
 
         return {groups: Array.from(g_ids), nodes: nodes, links: links};
-    }
-
-    this.addNode = function(url) {
-        if (!this.urls.has(url)) {
-            this.urls.add(url);
-            this.utoi.set(url,id);
-            this.itou.set(id, url);
-            _d3nodes.push({'url': url, 'id': id, group: 0});
-            id++;
-        }
-    }
-
-    this.addLink = function(url_from, url_to) {
-        this.addNode(url_from);
-        this.addNode(url_to);
-        var src = this.utoi.get(url_from);
-        var dest = this.utoi.get(url_to);
-        if (!this.adj.has(src)) {
-            this.adj.set(src, new Set([dest]))
-        } else {
-            this.adj.get(src).add(dest);
-        }
-        _d3links.push({source : src, target : dest, value : 1});
-    }
-
-    this.bindForceLayout = function (d3_force) {
-        d3_force.nodes(_d3nodes);
-        d3_force.links(_d3links);
-    }
+    };
 }

@@ -23,7 +23,8 @@ function init(userID) {
             results = results.map(function (c) {return c.toJSON();});
             sendResponse({jsons: results});
         } else if (request.name) {
-            var result = clusterMgr.get(request.name);
+            var name = decodeURIComponent(request.name); 
+            var result = clusterMgr.get(name);
             sendResponse({jsons: [result.toJSON()]});
         } else if (request.combine) {
             var result = clusterMgr.getCombined();
@@ -60,6 +61,7 @@ function init(userID) {
                 clusterMgr.editName(request.name, request.new_name);
             }
         }
+        uploadClusters();
     }
 
     // Upload clusterMgr. Uploads all if no name specified
@@ -199,11 +201,16 @@ function init(userID) {
 
     // Save data to file before closing
     chrome.windows.onRemoved.addListener(function (windowId) {
-        var logs = sessionMgr.getAllLogJSON();
-        logs.forEach(function (l) {
-            ServerConnection.sendJSON(l);
+        // Check if the last window is closing
+        chrome.windows.getAll(function (ws) {
+            if (ws.length <= 0) {
+                var logs = sessionMgr.getAllLogJSON();
+                logs.forEach(function (l) {
+                    ServerConnection.sendJSON(l);
+                });
+                uploadClusters();
+            }
         });
-        uploadClusters();
     });
 }
 
