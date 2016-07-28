@@ -30,7 +30,7 @@ var ClusterManager = (function () {
                 uname_id++;    
             }   
             var cluster = new UserCluster(name, [], null); 
-            cluster.addUrl(url);
+            if (url) cluster.addUrl(url);
             clusters.set(name, cluster);
             return cluster;
         }
