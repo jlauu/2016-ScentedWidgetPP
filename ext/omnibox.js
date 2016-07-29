@@ -27,8 +27,9 @@
                     return ClusterSuggest(r);
             });
             suggest(results);
-        } else if (text == 'ADD') {
-            var results = clusterMgr.getClusters().map(function (c) {
+        } else if (text.split(' ')[0] == 'ADD') {
+            var results = clusterMgr.search(text.replace('ADD',''))
+            results = results.map(function (c) {
                 return ClusterSuggest(c, 'ADD', 'Add current url to ' + c.name);
             });
             suggest(results);
@@ -39,13 +40,7 @@
             suggest(results);
         } else {
             obx.setDefaultSuggestion({description: "Search for clusters"});
-            var results = clusterMgr.getClusters().filter(function (c) {
-                return c.getKeywords().map(function (kw) {
-                    return kw.toLowerCase();
-                }).some(function (kw) {
-                    return kw.includes(text.toLowerCase());
-                });
-            });
+            var results = clusterMgr.search(text);
             suggest(results.map(function (r) {return ClusterSuggest(r);}));
         }
     });

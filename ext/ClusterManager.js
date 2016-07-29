@@ -14,6 +14,15 @@ var ClusterManager = (function () {
             return Array.from(clusters.values());
         } 
 
+        function search(text) {
+            var results = getClusters().filter(function (c) {
+                return c.getKeywords().some(function (kw) {
+                    return kw.toLowerCase().includes(text.toLowerCase());
+                });
+            });
+            return results;
+        }
+
         function getCombined() {
             var cs = getClusters();
             var c = cs.pop();
@@ -118,7 +127,8 @@ var ClusterManager = (function () {
             getClusters: getClusters,
             getCombined: getCombined,
             getClustersByUrl: getClustersByUrl,
-            editName: editName
+            editName: editName,
+            search: search
         }
     }
 
