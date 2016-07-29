@@ -54,6 +54,7 @@
            chrome.tabs.getSelected(function (tab) {
                clusterMgr.addToCluster(cluster, [normalizeUrl(tab.url)]);
            });
+           chrome.runtime.sendMessage({type: 'upload_cluster'});
        } else if (cmd == 'REMOVE') {
            chrome.tabs.getSelected(function (tab) {
                var url = normalizeUrl(tab.url);
@@ -62,6 +63,7 @@
                clusterMgr.removeFromCluster(cluster.name, [url]);
                sessionMgr.unregisterTab(tab.id);
            });
+           chrome.runtime.sendMessage({type: 'upload_cluster'});
        } else if (clusterMgr.has(text)) {
            chrome.windows.create({url: 'popup.html?cluster='+text}); 
        }
