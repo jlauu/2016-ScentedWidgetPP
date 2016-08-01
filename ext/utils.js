@@ -14,33 +14,43 @@ function normalizeUrl(u, resolve_with) {
 function importBookmarks() {
    chrome.bookmarks.getTree(function (root) {
         var tree = root[0];
-        function traverse (t, f) {
-            f(t); 
+        function traverse (parent, t, f) {
+            f(parent, t); 
             if (t.children) {
                 t.children.forEach(function (c) {
-                    traverse(c,f)
+                    traverse(t,c,f)
                 });
             }
         }
         var cm = ClusterManager.getInstance();
-        function mkC (t) {
-            cm.mkCluster(t.title);
-            var urls = [];
-            var kws = [];
-            t.children.forEach(function (c) {
-                urls.push(normalizeUrl(c.url));
-                var tmp = c.title.replace(/\W/g, ' ').split(' ');
-                kws = kws.concat(tmp.filter(function (k) {return k.length;}));
-            });
-            cm.addToCluster(t.title, urls, null, kws);
+        function mkC (parent, t) {
+            if (t.children) {
+                cm.mkCluster(t.title);
+                var urls = [];
+                var kws = [];
+                t.children.forEach(function (c) {
+                    if (c.url) {
+                        urls.push(normalizeUrl(c.url));
+                    }
+                    var tmp = c.title.replace(/\W/g, ' ').split(' ');
+                    kws = kws.concat(tmp.filter(function (k) {
+                        return k.length;
+                    }));
+                });
+                cm.addToCluster(t.title, urls, null, kws);
+            }
         }
-        var flat_tree = [];
-        traverse(tree, Array.prototype.push.bind(flat_tree));
-        var leaf_folders = flat_tree.filter(function (t) {
-            return t.children && t.children.every(function (c) {
-                return !c.children;
+
+        function mkH(parent, t) {
+            if (t.children && parent) {
+                cm.setParent(t.title, parent.title);
+            }
+        }
+        tree.children.forEach(function (t) {traverse(null, t, mkC);});
+        app.upload(function () {
+            app.reload(function () {
+                traverse(null, tree, mkH); 
             });
         });
-        leaf_folders.forEach(mkC);
    });
 }

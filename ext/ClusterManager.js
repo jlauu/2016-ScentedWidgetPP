@@ -7,8 +7,10 @@ var ClusterManager = (function () {
     var EDIT_MSG = 'cluster_edit';
     var UNNAMED_PREFIX = '_unnamed';
     function init() {
-        var clusters = new Map();
-        var ids = new Map();
+        var clusters = new Map(); // str -> cluster
+        var idCluster = new Map(); // id -> cluster
+        var nameToId = new Map(); // str -> id
+        var forest = new Map(); // id -> [id]
         var uname_id = 0;
 
         function getClusters() {
@@ -95,9 +97,11 @@ var ClusterManager = (function () {
                 });
             }
 
+            // Delete cluster if empty
             if (c.getUrls.length <= 0) {
                 clusters.delete(c.name);
-                ids.delete(c.id);
+                idCluster.delete(c.id);
+                nameToId.delete(c.name);
             }
         }
 
@@ -106,7 +110,9 @@ var ClusterManager = (function () {
                 var c = clusters.get(old);
                 c.name = new_;
                 clusters.set(new_, c);
+                nameToId.set(new_, c_);
                 clusters.delete(old);
+                nameToId.delete(old);
             }
         }
 
@@ -119,7 +125,64 @@ var ClusterManager = (function () {
             var cluster = new UserCluster(json.name, json.keywords, json.graph);
             if (json.id) cluster.id = json.id;
             clusters.set(cluster.name, cluster);
-            ids.set(cluster.id, cluster);
+            idCluster.set(cluster.id, cluster);
+            nameToId.set(cluster.name, cluster.id);
+        }
+
+        // Cluster hierarchy operations
+        function getParent(cname) {
+            var c_id = nameToId.get(cname);
+            var pair = Array.from(forest).find(function (p) {
+                return p[1].has(c_id);
+            });
+            return pair && pair[0];
+        }
+
+        function setParent(cname, pname) {
+            removeChild(getParent(cname), cname);
+            if (pname == null) return;
+            addChild(pname, cname);
+        }
+
+        function getChildren(name) {
+            var id = nameToId.get(name);
+            return forest.has(id) ? Array.from(forest.get(id)) : [];
+        }
+
+        function addChild(pname, cname) {
+            var c_id = nameToId.get(cname);
+            var p_id = nameToId.get(pname);
+            removeChild(getParent(cname), cname);
+            if (forest.has(p_id)) {
+                forest.get(p_id).add(c_id);
+            } else {
+                forest.set(p_id, new Set([c_id]));
+            }
+        }
+
+        function removeChild(pname, cname) {
+            var c_id = nameToId.get(cname);
+            var p_id = nameToId.get(pname);
+            if (forest.has(p_id)) {
+                forest.get(p_id).delete(c_id);
+            }
+        }
+
+        function getHierarchyJSON() {
+            return Array.from(forest.entries())
+                .map(function (pair) {
+                    var json = {
+                        parent: pair[0], 
+                        children: Array.from(pair[1])
+                    };
+                    return json;
+                });
+        }
+
+        function loadHierarchyJSON(json) {
+            json.forEach(function (o) {
+                forest.set(o.parent, o.children);
+            });
         }
 
         return {
@@ -138,7 +201,14 @@ var ClusterManager = (function () {
             getCombined: getCombined,
             getClustersByUrl: getClustersByUrl,
             editName: editName,
-            search: search
+            search: search,
+            getParent: getParent,
+            setParent: setParent,
+            getChildren: getChildren,
+            addChild: addChild,
+            removeChild: removeChild,
+            getHierarchyJSON: getHierarchyJSON,
+            loadHierarchyJSON: loadHierarchyJSON
         }
     }
 

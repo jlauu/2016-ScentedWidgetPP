@@ -1,6 +1,6 @@
 // main.js: top-level script that runs in background page
 'use strict';
-
+var app;
 function init(userID) {
     // Browsing Event handlers
     // Logs user clicks and input interactions
@@ -62,21 +62,14 @@ function init(userID) {
                 // Populate unique id within server db and retrieve it
                 if (!clusterMgr.hasId(request.new_name)) {
                     uploadClusters(request.new_name);
-                    ServerConnection.getClusters({
-                        name: request.new_name,
-                        userid: userID
-                    }, function (jsons) {
-                          jsons.forEach(function (j) {
-                                clusterMgr.loadJSON(j);
-                          });
-                    });
+                    downloadClusters({name: request.new_name, userid: userID});
                 }
             }
         }
     }
 
     // Upload clusterMgr. Uploads all if no name specified
-    function uploadClusters (request) {
+    function uploadClusters (request, callback) {
         var names = request ? request.names : null;
         var cs = clusterMgr.getClusters();
         if (names) {
@@ -90,7 +83,17 @@ function init(userID) {
             return json;
         });
         if (jsons) 
-            ServerConnection.sendJSON({type: 'cluster', data: jsons});
+            ServerConnection.sendJSON({type: 'cluster', data: jsons}, callback);
+    }
+
+    function downloadClusters(request, callback) {
+        // Initialize manager with clusters from server or localStorage
+        ServerConnection.getClusters(request, function (jsons) {
+            jsons.forEach(function (j) {
+                clusterMgr.loadJSON(j);
+            });
+            if (callback) callback();
+        });
     }
 
     // Registers a tab or window to a cluster
@@ -104,12 +107,7 @@ function init(userID) {
     var sessionMgr = SessionManager.getInstance(userID);
     var clusterMgr = ClusterManager.getInstance();
 
-    // Initialize manager with clusters from server or localStorage
-    ServerConnection.getClusters({userid: userID}, function (jsons) {
-        jsons.forEach(function (j) {
-            clusterMgr.loadJSON(j);
-        });
-    });
+    downloadClusters({userid: userID});
 
     // Upload sessionMgr logs when they reach capacity
     sessionMgr.addMaxLogListener(function (json) {
@@ -129,6 +127,7 @@ function init(userID) {
     messageHandlers[clusterMgr.edit_message_name] = editCluster;
     messageHandlers[sessionMgr.register_message_name] = registerTabWindows;
     messageHandlers["upload_cluster"] = uploadClusters;
+    messageHandlers["reload_cluster"] = downloadClusters;
 
     chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         if (request.type.includes(sessionMgr.capture_message_name)) {
@@ -223,8 +222,13 @@ function init(userID) {
             }
         });
     });
+
+    return {
+        reload: function (cb) {downloadClusters({userid: userID},cb);},
+        upload: function (cb) {uploadClusters({}, cb);}
+    }
 }
 
 chrome.identity.getProfileUserInfo(function (info) {
-    init(info.id);
+    app = init(info.id);
 });

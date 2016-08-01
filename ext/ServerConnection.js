@@ -3,7 +3,7 @@ var ServerConnection = (function () {
     var webhost = 'swpp-server-stage.herokuapp.com';
 
     // Sends logged data for one capture type to the server as a json
-    function sendJSON (data) {
+    function sendJSON (data, callback) {
         var xhr = new XMLHttpRequest();
         var json = JSON.stringify(data);
         var url = URI({protocol: "https", hostname: webhost, path: '/send'});
@@ -12,6 +12,8 @@ var ServerConnection = (function () {
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4 && xhr.status == 200) {
                 console.log(xhr.responseText);
+            if (callback)
+                callback();
             }
         }
         xhr.send(json);
