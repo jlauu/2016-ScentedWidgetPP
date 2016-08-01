@@ -2,6 +2,7 @@
 
 // TODO: inherit from BrowsingGraph
 function UserCluster(name, keywords, graph) {
+    this.id = null;
     this.name = name;
     this.keywords = new Set(keywords) || new Set();
     this.graph = new BrowsingGraph();
@@ -65,6 +66,7 @@ function UserCluster(name, keywords, graph) {
         var cluster = this.graph.toJSON();
         cluster.nodes.forEach(function (n) {n.cluster = this.name;}, this);
         return {
+            id: this.id,
             name: this.name,
             keywords: Array.from(this.keywords),
             graph: cluster

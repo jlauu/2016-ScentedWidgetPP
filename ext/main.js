@@ -58,9 +58,21 @@ function init(userID) {
                                       request.keywords || []);
             } else if (request.new_name) {
                 clusterMgr.editName(request.name, request.new_name);
+                uploadClusters();
+                // Populate unique id within server db and retrieve it
+                if (!clusterMgr.hasId(request.new_name)) {
+                    uploadClusters(request.new_name);
+                    ServerConnection.getClusters({
+                        name: request.new_name,
+                        userid: userID
+                    }, function (jsons) {
+                          jsons.forEach(function (j) {
+                                clusterMgr.loadJSON(j);
+                          });
+                    });
+                }
             }
         }
-        uploadClusters();
     }
 
     // Upload clusterMgr. Uploads all if no name specified
@@ -93,7 +105,7 @@ function init(userID) {
     var clusterMgr = ClusterManager.getInstance();
 
     // Initialize manager with clusters from server or localStorage
-    ServerConnection.getClusters(userID, function (jsons) {
+    ServerConnection.getClusters({userid: userID}, function (jsons) {
         jsons.forEach(function (j) {
             clusterMgr.loadJSON(j);
         });

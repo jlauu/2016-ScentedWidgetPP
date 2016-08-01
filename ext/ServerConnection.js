@@ -17,9 +17,14 @@ var ServerConnection = (function () {
         xhr.send(json);
     }
 
-    function getClusters(userid, callback) {
+    function getClusters(request, callback) {
+        var userid = request.userid;
+        var name = request.name || null;
         var xhr = new XMLHttpRequest();
         var url = URI({protocol: 'https', hostname: webhost, query: "uid=" + userid});
+        if (name) {
+            url.addSearch("name",name);
+        }
         xhr.open("GET", url.toString(), true);
         xhr.setRequestHeader("Content-type", "application/json");
         xhr.onreadystatechange = function () {

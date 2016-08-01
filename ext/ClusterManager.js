@@ -8,6 +8,7 @@ var ClusterManager = (function () {
     var UNNAMED_PREFIX = '_unnamed';
     function init() {
         var clusters = new Map();
+        var ids = new Map();
         var uname_id = 0;
 
         function getClusters() {
@@ -52,6 +53,11 @@ var ClusterManager = (function () {
             return clusters.has(name);
         }
 
+        function hasId(name) {
+            var c = clusters.get(name);
+            return c && c.id;
+        }
+
         function addToCluster(name, urls, links, keywords) {
             var c = get(name);
             if (urls) {
@@ -91,6 +97,7 @@ var ClusterManager = (function () {
 
             if (c.getUrls.length <= 0) {
                 clusters.delete(c.name);
+                ids.delete(c.id);
             }
         }
 
@@ -110,7 +117,9 @@ var ClusterManager = (function () {
         // Loads a cluster from json
         function loadJSON(json) {
             var cluster = new UserCluster(json.name, json.keywords, json.graph);
+            if (json.id) cluster.id = json.id;
             clusters.set(cluster.name, cluster);
+            ids.set(cluster.id, cluster);
         }
 
         return {
@@ -124,6 +133,7 @@ var ClusterManager = (function () {
             loadJSON: loadJSON,
             get: get,
             has: has,
+            hasId: hasId,
             getClusters: getClusters,
             getCombined: getCombined,
             getClustersByUrl: getClustersByUrl,
