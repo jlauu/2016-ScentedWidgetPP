@@ -22,11 +22,12 @@ var SWPP = (function (SWPP) {
                 theta = 0;
             }
             var offset = 2 * Math.PI / (foci.length);
-            var a = 2 * Math.log(foci.length) * Math.log(foci.length);
+            var a = .8; //2 * Math.log(foci.length) * Math.log(foci.length);
+            var b = .8;
             for (var i in foci) {
                 foci[i] = {
                     'x': a * Math.cos(theta + i*offset - Math.PI/2) * r + width/2,
-                    'y': 1.2 * Math.sin(theta + i*offset - Math.PI/2) * r + height*2
+                    'y': b * Math.sin(theta + i*offset - Math.PI/2) * r + height/2
                 }
             }
         }
@@ -69,22 +70,36 @@ var SWPP = (function (SWPP) {
             focus_tick = ring_foci_tick;
         };
 
+        function getNodeFocus(d) {
+            if (d.rep) {
+                var index = ring_clusters.indexOf(d.group);
+                var focus;
+                if (index > -1) {
+                    focus = foci[index];
+                } else {
+                    focus = {x:SWPP.getWidth()/2,y:SWPP.getHeight()/2};
+                }
+                return focus;
+            } else {
+                var rep = cluster_representatives[d.group];
+                return {x:rep.x, y:rep.y};
+            }
+        }
+
+        function getNodeForce(d,e) {
+            var k = e.alpha;
+            var index = ring_clusters.indexOf(d.group);
+            if (d.rep) {
+                return index > -1 ? k*3 : k*.1;
+            } else {
+                return index > -1 ? k*.8 : k*.1;
+            }
+        }
+
         SWPP.nodeTick = function (e, nodes) {
             nodes.attr("transform", function (d,i) {
-                var focus, k;
-                if (d.rep) {
-                    var index = ring_clusters.indexOf(d.group);
-                    if (index > -1) {
-                        focus = foci[index];
-                    } else {
-                        focus = {x:SWPP.getWidth()/2,y:SWPP.getHeight()/2};
-                    }
-                    k = e.alpha * .8;
-                } else {
-                    var rep = cluster_representatives[d.group];
-                    focus = {x:rep.x, y:rep.y};
-                    k = e.alpha * .1;
-                }
+                var focus = getNodeFocus(d);
+                var k = getNodeForce(d,e);
                 var x = d.x - focus.x,
                     y = d.y - focus.y,
                     l = Math.sqrt(x*x + y*y) ;

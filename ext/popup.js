@@ -4,7 +4,7 @@ var config = {
     node_style_fill: function (d) {return d.focus ? 2 : 1;},
     node_attr_r: 5,
     gravity: .2,
-    charge: -500,
+    charge: -1,
     linkDistance: 50,
     linkStrength: .5,
     tabs: null,

@@ -1,6 +1,6 @@
 'use strict';
 var config = {
-    charge: -960,
+    charge: -.02,
     gravity: 0,
     linkDistance: 40,
     linkStrength: 1,

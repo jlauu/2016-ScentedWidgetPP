@@ -41,6 +41,16 @@ var SWPP = (function (window) {
         return svg.attr('height');
     };
 
+    module.getScaledForce = function () {
+        var n = d3.selectAll(".nodes").length;
+        var s = force.size();
+        return Math.sqrt(n / (s[0] * s[1]));
+    }
+
+    function validCfg(prop, default_val) {
+        return typeof prop === "number" ? prop : default_val;
+    }
+
     // Start/initialize d3's force layout
     module.init = function (cfg) {
         module.config = cfg;
@@ -48,10 +58,10 @@ var SWPP = (function (window) {
         width = window.innerWidth,
         height = window.innerHeight,
         force = d3.layout.force()
-            .charge(config.charge || -120)
-            .gravity(config.gravity || 0.3)
-            .linkDistance(config.linkDistance || 15)
-            .linkStrength(config.linkStrength || .2)
+            .charge(validCfg(config.charge,-120))
+            .gravity(validCfg(config.gravity,.3))
+            .linkDistance(validCfg(config.linkDistance,5))
+            .linkStrength(validCfg(config.linkStrength,2))
             .size([width,height])
         
         svg = d3.select("div.svg-container").append("svg")
@@ -157,7 +167,17 @@ var SWPP = (function (window) {
           .attr("viewBox", "0 0 "+width+" "+height)
           .attr("width",  width)
           .attr("height", height);
-        force.size([width,height]).resume();
+        // Readjust forces
+        force.size([width,height]);
+        var k = module.getScaledForce();
+        var config = module.config;
+        force 
+            .charge((config.charge || -1) / k)
+            //.gravity((config.gravity || 0.3) * k)
+            // TODO: scale links 
+            //.linkDistance(config.linkDistance || 15)
+            //.linkStrength(config.linkStrength || .2)
+            .resume();
     };
 
     // Virtual function to modify or select a subset of the original graph
