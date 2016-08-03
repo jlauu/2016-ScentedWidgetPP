@@ -68,7 +68,7 @@ function init(userID) {
         }
     }
 
-    // Upload clusterMgr. Uploads all if no name specified
+    // Uploads all clusters if no name specified
     function uploadClusters (request, callback) {
         var names = request ? request.names : null;
         var cs = clusterMgr.getClusters();
@@ -82,8 +82,17 @@ function init(userID) {
             json.userID = userID;
             return json;
         });
-        if (jsons) 
-            ServerConnection.sendJSON({type: 'cluster', data: jsons}, callback);
+        var hjson = clusterMgr.getHierarchyJSON();
+        ServerConnection.sendJSON({
+            type: 'forest', 
+            data: {data: hjson, userID: userID}
+        }, function () {
+            if (jsons) {
+                ServerConnection.sendJSON({type: 'cluster', data: jsons}, callback);
+            } else {
+                callback();
+            }
+        });
     }
 
     function downloadClusters(request, callback) {

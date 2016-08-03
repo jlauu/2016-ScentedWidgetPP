@@ -32,7 +32,7 @@ var ClusterManager = (function () {
             if (cs.length) {
                 return c.mergeJSON(cs);
             } else {
-                return c.toJSON();
+                return c ? c.toJSON() : [];
             }
         }
 
@@ -181,7 +181,7 @@ var ClusterManager = (function () {
 
         function loadHierarchyJSON(json) {
             json.forEach(function (o) {
-                forest.set(o.parent, o.children);
+                forest.set(o.parent, new Set(o.children));
             });
         }
 

@@ -48,8 +48,11 @@ function importBookmarks() {
         }
         tree.children.forEach(function (t) {traverse(null, t, mkC);});
         app.upload(function () {
+            // Get cluster with ids populated
             app.reload(function () {
                 traverse(null, tree, mkH); 
+                // Upload populated hierarchy
+                app.upload();
             });
         });
    });
