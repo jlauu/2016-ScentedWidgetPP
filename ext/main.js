@@ -99,8 +99,10 @@ function init(userID) {
 
     function downloadClusters(request, callback) {
         // Initialize manager with clusters from server or localStorage
-        ServerConnection.getClusters(request, function (jsons) {
-            jsons.forEach(function (j) {
+        ServerConnection.getClusters(request, function (data) {
+            clusterMgr.loadHierarchyJSON(data.hierarchy);
+            var cs = data.clusters;
+            cs.forEach(function (j) {
                 clusterMgr.loadJSON(j);
             });
             if (callback) callback();
@@ -214,6 +216,8 @@ function init(userID) {
                 if (clusters.length) {
                     cname = clusters[0].name
                     sessionMgr.registerTab(tabId, name);
+                } else { 
+                    return;
                 }
             }
             // Check if we can make an edge based on last logged link
