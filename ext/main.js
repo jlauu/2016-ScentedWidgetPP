@@ -21,16 +21,18 @@ function init(userID) {
         if (request.url) {
             var results = clusterMgr.getClustersByUrl(request.url);
             results = results.map(function (c) {return c.toJSON();});
-            sendResponse({jsons: results});
         } else if (request.name) {
-            var result = clusterMgr.get(request.name);
-            sendResponse({jsons: [result.toJSON()]});
+            var results = [clusterMgr.get(request.name).toJSON()];
         } else if (request.combine) {
-            var result = clusterMgr.getCombined();
-            sendResponse({jsons: [result]});
+            var results = [clusterMgr.getCombined()];
         } else {
             var results = clusterMgr.getClusters();
             results = results.map(function (c) {return c.toJSON();});
+        }
+        if (results) {
+            results.forEach(function (c) {
+                clusterMgr.getHierarchyJSON(c.name);
+            });
             sendResponse({jsons: results}); 
         }
     }
@@ -210,7 +212,7 @@ function init(userID) {
             if (!cname) {
                 var clusters = clusterMgr.getClustersByUrl(url);
                 if (clusters.length) {
-                    name = clusters[0].name
+                    cname = clusters[0].name
                     sessionMgr.registerTab(tabId, name);
                 }
             }
@@ -218,9 +220,9 @@ function init(userID) {
             var last = sessionMgr.getLastLink();
             if (last && last.to == url) {
                 var links = [{from: last.from, to: last.to}];
-                clusterMgr.addToCluster(name, [], links, []);
+                clusterMgr.addToCluster(cname, [], links, []);
             } else {
-                clusterMgr.addToCluster(name, [url], [], []);
+                clusterMgr.addToCluster(cname, [url], [], []);
             }
         }
     });
