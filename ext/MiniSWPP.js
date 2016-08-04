@@ -2,6 +2,14 @@
 var SWPP = (function (SWPP) {
     // Extend with interaction
     var super_preStart = SWPP.preStart;
+    
+    SWPP.getScaledForce = function () {
+        var n = SWPP.graph.nodes.length;
+        var w = SWPP.getWidth();
+        var h = SWPP.getHeight();
+        return Math.sqrt(n / (w*h));
+    }
+
     SWPP.preStart = function (force, svg, nodes, links) {
         super_preStart(force,svg,nodes,links);
         nodes
@@ -16,7 +24,7 @@ var SWPP = (function (SWPP) {
                 .attr('y', 15)
                 .attr('x', 15)
                 .attr('dy', '.35em')
-                .text(d.url);
+                .text(d.url || d.name);
         })
         .on("mouseleave", function () {
             svg.selectAll('#url-text').remove();

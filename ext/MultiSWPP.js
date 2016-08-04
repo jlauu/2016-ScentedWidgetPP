@@ -90,7 +90,7 @@ var SWPP = (function (SWPP) {
             var k = e.alpha;
             var index = ring_clusters.indexOf(d.group);
             if (d.rep) {
-                return index > -1 ? k*3 : k*.1;
+                return index > -1 ? k*3 : k*.6;
             } else {
                 return index > -1 ? k*.8 : k*.1;
             }

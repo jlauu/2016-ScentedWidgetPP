@@ -1,10 +1,10 @@
 'use strict';
 // Graph layout and display configuration
 var config = {
-    node_style_fill: function (d) {return d.focus ? 2 : 1;},
-    node_attr_r: 5,
-    gravity: .2,
-    charge: -1,
+    node_style_fill: function (d) {return d.cluster_name;},
+    node_attr_r: function (d) {return d.cluster_type ? 8 : 5},
+    gravity: .1,
+    charge: -3,
     linkDistance: 50,
     linkStrength: .5,
     tabs: null,
@@ -140,6 +140,7 @@ function setPopupSize(w, h) {
 function getClusterResponse(data, callback) {
     cluster_data = data;
     config.json = cluster_data.graph;
+    config.children = cluster_data.children;
     callback();
 }
 

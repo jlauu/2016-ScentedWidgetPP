@@ -31,7 +31,7 @@ function init(userID) {
         }
         if (results) {
             results.forEach(function (c) {
-                clusterMgr.getHierarchyJSON(c.name);
+                c.children = clusterMgr.getChildren(c.name);
             });
             sendResponse({jsons: results}); 
         }
@@ -215,7 +215,7 @@ function init(userID) {
                 var clusters = clusterMgr.getClustersByUrl(url);
                 if (clusters.length) {
                     cname = clusters[0].name
-                    sessionMgr.registerTab(tabId, name);
+                    sessionMgr.registerTab(tab, cname);
                 } else { 
                     return;
                 }

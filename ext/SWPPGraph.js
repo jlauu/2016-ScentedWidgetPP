@@ -41,10 +41,17 @@ var SWPP = (function (window) {
         return svg.attr('height');
     };
 
+    module.hasLink = function (n) {
+        return module.graph.links.some(function (l) {
+            return l.source === n || l.target === n;
+        });
+    }
+
     module.getScaledForce = function () {
-        var n = d3.selectAll(".nodes").length;
+        //var n = d3.selectAll('.node')[0].length;
         var s = force.size();
-        return Math.sqrt(n / (s[0] * s[1]));
+        var k = Math.sqrt(1 / (s[0] * s[1]));
+        return k < 1 ? 1 : k;
     }
 
     function validCfg(prop, default_val) {
@@ -58,21 +65,25 @@ var SWPP = (function (window) {
         width = window.innerWidth,
         height = window.innerHeight,
         force = d3.layout.force()
-            .charge(validCfg(config.charge,-120))
             .gravity(validCfg(config.gravity,.3))
             .linkDistance(validCfg(config.linkDistance,5))
             .linkStrength(validCfg(config.linkStrength,2))
-            .size([width,height])
-        
+            .size([width,height]);
+        if (config.chargeDistance)
+            force.chargeDistance(config.chargeDistance);
         svg = d3.select("div.svg-container").append("svg")
             .attr("preserveAspectRatio", "xMinYMin meet")
             .classed("svg-content-responsive", true);
-        module.resize()
         d3.select(window).on('resize', function () {
             module.resize();
         });
         module.data = config.json;
-        module.graph = module.preprocess(config);
+        module.update();
+    }
+
+    module.update = function (cfg) {
+        module.graph = module.preprocess(cfg || module.config);
+        module.resize()
         var graph = module.graph;
         force
             .nodes(graph.nodes)
@@ -104,12 +115,19 @@ var SWPP = (function (window) {
             .attr("class", "node")
             .attr("cx", function (d) {return d.x;})
             .attr("cy", function (d) {return d.y;})
-            .call(force.drag)
-         nodes.append("circle")
+            .append("circle")
             .style("fill", function (d) {
-                return color(module.config.node_style_fill || d.group); 
+                var f = module.config.node_style_fill;
+                return color(f ? f(d) : d.group);
             })
             .attr("r", module.config.node_attr_r || 5)
+            .call(force.drag)
+         nodes.exit()
+            .each(function (d) {
+                links.filter(function (l) {
+                    return l.source === d || l.target === d;
+                }).remove();
+            }).remove();
     }
 
     // Draws edges with arrows - http://bl.ocks.org/d3noob/5141278
@@ -171,8 +189,12 @@ var SWPP = (function (window) {
         force.size([width,height]);
         var k = module.getScaledForce();
         var config = module.config;
+        var ld = validCfg(config.linkDistance, 10 / k);
+        var charge = validCfg(config.charge, -1);
         force 
-            .charge((config.charge || -1) / k)
+            .charge(function (d) {
+                return (module.hasLink(d) ? charge * ld *.2 : charge) / k;
+            })
             //.gravity((config.gravity || 0.3) * k)
             // TODO: scale links 
             //.linkDistance(config.linkDistance || 15)

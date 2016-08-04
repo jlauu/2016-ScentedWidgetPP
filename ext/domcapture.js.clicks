@@ -1,0 +1,196 @@
+// domcapture.js - Captures dom mutations as diff tree
+var $SWPP = jQuery.noConflict();
+
+var UNDOREDO = (function (Sniffer, $j) {
+    var ORIG_BODY = (new DOMParser())
+        .parseFromString(document.body.outerHTML, 'text/html');
+    function processMutations(ms) {
+        var pms = [];
+        ms.forEach(function (mut) {
+            var parents = new Map();
+            // Copy reference to parent
+            mut.added.forEach(function (n) {
+                parents.set(n, n.parentNode);
+            });
+            mut.removed.forEach(function (n) {
+                parents.set(n, mut.getOldParentNode(n));
+            });
+
+            var attributeChanged = [];
+            // Copy old and new attribute values
+            Object.keys(mut.attributeChanged).forEach(function(attr) {
+                attributeChanged[attr] = [];
+                mut.attributeChanged[attr].forEach(function (elem) {
+                    attributeChanged[attr].push({
+                        elem: elem,
+                        newVal: elem.getAttribute(attr),
+                        oldVal: mut.getOldAttribute(elem, attr)
+                    });
+                });
+            });
+            pms.push({
+                added: mut.added,
+                removed: mut.removed,
+                attributeChanged: attributeChanged,
+                parents: parents
+            });
+        });
+        return pms;
+    }
+    var BLOCKED_STATE = false;
+    var observer = new MutationSummary({
+        callback: function(ms) {
+            if (BLOCKED_STATE) {
+                BLOCKED_STATE = false;
+                return;
+            }
+            //history.add(processMutations(ms));
+        },
+        oldPreviousSibling: true,
+        queries: [{all: true}]
+    });
+
+    Sniffer.onSnifferCapture.addListener(function (e) {
+        if (e.event == 'click') {
+            if (e.target.id == 'SWPP_BACK' || 
+                e.target.id == 'SWPP_NEXT' ||
+                e.target.id == 'navdiv')
+                return;
+            history.add(e);
+        }
+    })
+
+    var history = {
+        stack: [],
+        cur: 0,
+        add: function (elem) {
+            this.cur++;
+            this.stack.splice(this.cur, this.stack.length-this.cur, elem);
+        },
+        next: function () {
+            console.log(this.cur + '/' + this.stack.length);
+            if (this.cur < this.stack.length) {
+                return this.stack[this.cur++];
+            } else {
+                return undefined;
+            }
+        },
+        prev: function () {
+            console.log(this.cur + '/' + this.stack.length);
+            if (this.cur >= 0) {
+                return this.stack[--this.cur];
+            } else {
+                return undefined;
+            }
+        },
+        goto: function (index) {
+            if (index < this.stack.length && index >= 0) {
+                this.cur = index;
+                return this.stack[this.cur];
+            } else {
+                return undefined;
+            }
+        }
+    };
+    
+    var UNDOREDO = {
+        clickEvt: new Event('click'),
+        addNodes: function (nodes, parents) {
+            nodes.forEach(function (n) {
+                BLOCKED_STATE = true;
+                var parent = parents.get(n);
+                parent.insertBefore(n, parent.firstChild);
+            });
+        }, 
+
+        removeNodes: function (nodes, parents) {
+            nodes.forEach(function (n) {
+                BLOCKED_STATE = true;
+                var parent = parents.get(n);
+                parent.removeChild(n);
+            });
+        }, 
+        
+        applyAttributes: function (attributes) {
+            Object.keys(attributes).forEach(function (attr) {
+                attributes[attr].forEach(function (pair) {
+                    BLOCKED_STATE = true;
+                    pair.elem.setAttribute(attr, pair.newVal);
+                });
+            });
+        },
+
+        reverseAttributes: function (attributes) {
+            Object.keys(attributes).forEach(function (attr) {
+                attributes[attr].forEach(function (pair) {
+                    BLOCKED_STATE = true;
+                    pair.elem.setAttribute(attr, pair.oldVal);
+                });
+            });
+        },
+
+        applyMutation: function (mut) {
+            if (mut.added) {
+                this.addNodes(mut.added, mut.parents);
+            } 
+            if (mut.removed) {
+                this.removeNodes(mut.removed, mut.parents);
+            }
+            if (mut.attributeChanged) {
+                this.applyAttributes(mut.attributeChanged);
+            }
+        },
+        reverseMutation: function (mut) {
+            if (mut.added) {
+                this.removeNodes(mut.added, mut.parents);
+            }
+            if (mut.removed) {
+                this.addNodes(mut.removed, mut.parents);
+            }
+            if (mut.attributeChanged) {
+                this.reverseAttributes(mut.attributeChanged);
+            }
+        },
+        forward: function () {
+            var e = history.next();
+            if (e == undefined) return;
+            e.target.dispatchEvent(this.clickEvt);
+        },
+        back: function () {
+            var e = history.prev();
+            if (e == undefined) return;
+            document.body = ORIG_BODY.body;
+            for (var i=0; i<history.cur; i++) {
+                var e = history.goto(i);
+                e.target.dispatchEvent(this.clickEvt);
+            }
+        }
+//        forward: function () {
+//            var ms = history.next();
+//            if (ms == undefined) return;
+//            ms.forEach(function (m) {this.applyMutation(m);}, this);
+//        },
+//        back: function () {
+//            var ms = history.prev();
+//            if (ms == undefined) return;
+//            ms.forEach(function (m) {this.reverseMutation(m);}, this);
+//        }
+    };
+    var next_button = $j('<input type="button" id="SWPP_NEXT" value="next" />');
+    next_button
+        .on('click', function () {UNDOREDO.forward();})
+    var back_button = $j('<input type="button" id="SWPP_BACK" value="back" />');
+    back_button
+        .on('click', function () {UNDOREDO.back();})
+    var box = $j('<div id="undoredo"></div>')
+        .css('position', 'fixed')
+        .css('right', '50px')
+        .css('top', '0px');
+    back_button.appendTo(box);
+    next_button.appendTo(box);
+    BLOCKED_STATE = true;
+    box.appendTo($j('body'))
+    BLOCKED_STATE = true;
+
+    return UNDOREDO;
+})(Sniffer,$SWPP);
