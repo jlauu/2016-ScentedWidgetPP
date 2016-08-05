@@ -47,6 +47,7 @@ function init(userID) {
     function newCluster (request, sendResponse) {
         var c = clusterMgr.mkCluster(null, request.url);
         var json = c.toJSON();
+        json.children = [];
         sendResponse({json: json});
     }
 

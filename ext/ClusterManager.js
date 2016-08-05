@@ -146,7 +146,7 @@ var ClusterManager = (function () {
 
         function getChildren(name) {
             var id = nameToId.get(name);
-            if (!forest.has(id)) return [];
+            if (!id || !forest.has(id)) return [];
             return Array.from(forest.get(id))
                 .map(function(id) {
                     return idCluster.get(id);
