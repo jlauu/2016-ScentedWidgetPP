@@ -2,27 +2,29 @@
 var SWPP = (function (SWPP) {
     var _preprocess = SWPP.preprocess;
     var _preStart = SWPP.preStart;
-    var nameToCluster = new Map();
 
     function click (d) {
         if (d.cluster_type) {
-            expand(nameToCluster.get(d.cluster_name));
+            expand(d);
         }
     }
 
     function expand (cluster) {
+        //d3.selectAll('.node').filter(function (d) {
+        //    return d.cluster_type && d.cluster === cluster.cluster;
+        //}).remove();
+        SWPP.graph.nodes = SWPP.graph.nodes.filter(function (d) {
+            return !(d === cluster);
+        });        
         cluster.graph.nodes.forEach(function (n) {
+            n.cluster_type = false;
+            n.cluster = cluster.name;
             SWPP.graph.nodes.push(n);
-            n.cluster_name = cluster.name;
         });
         cluster.graph.links.forEach(function (l) {
-            SWPP.links.push(l);
+            SWPP.graph.links.push(l);
         });
-        SWPP.graph.nodes.forEach(function (n) {
-            if (!n.cluster_name) {
-                n.cluster_name = config.name;
-            }
-        });
+        d3.selectAll('#cluster-text').remove();
         SWPP.update();
     }
 
@@ -33,13 +35,12 @@ var SWPP = (function (SWPP) {
             d.cluster_type = false;
         });
         config.children.forEach(function (c) {
-            nameToCluster.set(c.name, c);
-            graph.nodes.push({
-                cluster_type: true,
-                cluster_name: c.name,
-                id: c.name
-            });
+            c.cluster_type = true;
+            c.id = c.name;
+            c.cluster = c.name;
         });
+        graph.nodes = graph.nodes.concat(config.children);
+        config.children = [];
         return graph;
     };
 
@@ -59,8 +60,7 @@ var SWPP = (function (SWPP) {
             .on("mouseleave", function () {
                 svg.selectAll('#cluster-text').remove();
             });
-            
-    }
+    };
 
     return SWPP;
 })(SWPP || {});

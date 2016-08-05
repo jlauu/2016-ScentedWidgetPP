@@ -1,8 +1,9 @@
 'use strict';
 // Graph layout and display configuration
 var config = {
-    node_style_fill: function (d) {return d.cluster_name;},
+    node_style_fill: function (d) {return d.cluster;},
     node_attr_r: function (d) {return d.cluster_type ? 8 : 5},
+    node_key: function (d) {return d.cluster+d.id;},
     gravity: .1,
     charge: -3,
     linkDistance: 50,

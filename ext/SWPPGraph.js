@@ -6,6 +6,7 @@ var SWPP = (function (window) {
         data: null, // the original data json
         config: null // the original data and other options
     },
+    color = null,
     width = null,
     height = null,
     force = null,
@@ -64,6 +65,7 @@ var SWPP = (function (window) {
         var config = cfg;
         width = window.innerWidth,
         height = window.innerHeight,
+        color = d3.scale.category20();
         force = d3.layout.force()
             .gravity(validCfg(config.gravity,.3))
             .linkDistance(validCfg(config.linkDistance,5))
@@ -78,11 +80,11 @@ var SWPP = (function (window) {
             module.resize();
         });
         module.data = config.json;
+        module.graph = module.preprocess(cfg || module.config);
         module.update();
     }
 
-    module.update = function (cfg) {
-        module.graph = module.preprocess(cfg || module.config);
+    module.update = function () {
         module.resize()
         var graph = module.graph;
         force
@@ -90,12 +92,16 @@ var SWPP = (function (window) {
             .links(graph.links)
         // Set edge look and behavior
         links = svg.selectAll(".link")
-            .data(force.links());
+            .data(force.links(), config.link_key || function (d) {
+                return [d.source, d.target];
+            });
         module.defineLinks(links);
 
         // Set node look and behavior
         nodes = svg.selectAll(".node")
-            .data(force.nodes(), function (d) {return d.id;})
+            .data(force.nodes(), config.node_key || function (d) {
+                return d.id;
+            });
         module.defineNodes(nodes);
 
         function tick (e) {
@@ -110,7 +116,6 @@ var SWPP = (function (window) {
     }
 
     module.defineNodes = function (nodes) {
-          var color = d3.scale.category20();
           nodes.enter().append("g")
             .attr("class", "node")
             .attr("cx", function (d) {return d.x;})
@@ -121,7 +126,6 @@ var SWPP = (function (window) {
                 return color(f ? f(d) : d.group);
             })
             .attr("r", module.config.node_attr_r || 5)
-            .call(force.drag)
          nodes.exit()
             .each(function (d) {
                 links.filter(function (l) {
