@@ -195,10 +195,10 @@ var SWPP = (function (window) {
         var config = module.config;
         var ld = validCfg(config.linkDistance, 10 / k);
         var charge = validCfg(config.charge, -1);
-        force 
-            .charge(function (d) {
-                return (module.hasLink(d) ? charge * ld *.2 : charge) / k;
-            })
+        force.charge(charge + ld * -.5)
+            //.charge(function (d) {
+            //    return (module.hasLink(d) ? charge * ld *.2 : charge) / k;
+            //})
             //.gravity((config.gravity || 0.3) * k)
             // TODO: scale links 
             //.linkDistance(config.linkDistance || 15)
