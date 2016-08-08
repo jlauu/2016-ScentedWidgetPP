@@ -28,7 +28,6 @@
             "utils.js",
             "lib/jquery-3.1.0.min.js",
             "sniffer.js",
-            "domcapture.js"
         ]
       }
   ],
