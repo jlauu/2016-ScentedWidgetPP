@@ -210,14 +210,16 @@ function init(userID) {
     chrome.tabs.onUpdated.addListener(function (tabId, info, tab) {
         var url = normalizeUrl(tab.url);
         var cname = sessionMgr.clusterOfTab(tabId);
+        // Try to find associated cluster
         if (!cname) {
             var clusters = clusterMgr.getClustersByUrl(url);
             if (clusters.length) {
                 cname = clusters[0].name
-                sessionMgr.registerTab(tab, cname);
+            } else if (tab.openerTabId) {
+                cname = sessionMgr.clusterOfTab(tab.openerTabId);
             }
+            if (cname)  sessionMgr.registerTab(tab, cname);
         }
-        // Tab is already associated to a cluster
         if (cname) {
             var last = sessionMgr.getLastLink();
             // New url is added as a link
@@ -229,9 +231,7 @@ function init(userID) {
                 clusterMgr.addToCluster(cname, [url], [], []);
             }
             sessionMgr.registerTab(tab, cname);
-        } else {
-            
-        }
+        }     
     });
 
     // Save data to file before closing
