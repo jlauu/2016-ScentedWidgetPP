@@ -208,27 +208,29 @@ function init(userID) {
 
     // Update clusterMgr on tab update
     chrome.tabs.onUpdated.addListener(function (tabId, info, tab) {
-        if (info.url) {
-            var url = normalizeUrl(info.url);
-            if (url.includes('chrome://')) return;
-            var cname = sessionMgr.clusterOfTab(tabId);
-            if (!cname) {
-                var clusters = clusterMgr.getClustersByUrl(url);
-                if (clusters.length) {
-                    cname = clusters[0].name
-                    sessionMgr.registerTab(tab, cname);
-                } else { 
-                    return;
-                }
+        var url = normalizeUrl(tab.url);
+        var cname = sessionMgr.clusterOfTab(tabId);
+        if (!cname) {
+            var clusters = clusterMgr.getClustersByUrl(url);
+            if (clusters.length) {
+                cname = clusters[0].name
+                sessionMgr.registerTab(tab, cname);
             }
-            // Check if we can make an edge based on last logged link
+        }
+        // Tab is already associated to a cluster
+        if (cname) {
             var last = sessionMgr.getLastLink();
+            // New url is added as a link
             if (last && last.to == url) {
                 var links = [{from: last.from, to: last.to}];
                 clusterMgr.addToCluster(cname, [], links, []);
+            // Add url as an individual node
             } else {
                 clusterMgr.addToCluster(cname, [url], [], []);
             }
+            sessionMgr.registerTab(tab, cname);
+        } else {
+            
         }
     });
 

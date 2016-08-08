@@ -110,7 +110,7 @@ var ClusterManager = (function () {
                 var c = clusters.get(old);
                 c.name = new_;
                 clusters.set(new_, c);
-                nameToId.set(new_, c_);
+                nameToId.set(new_, c);
                 clusters.delete(old);
                 nameToId.delete(old);
             }
