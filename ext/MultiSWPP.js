@@ -147,6 +147,9 @@ var SWPP = (function (SWPP) {
                     SWPP.ring_shift_left();
                 } else if (d3.event.keyCode == 39) { // right
                     SWPP.ring_shift_right();
+                } else if (d3.event.keyCode ==  13) { // enter
+                    var c = config.groupToCluster[selected];
+                    chrome.tabs.update({url : "popup.html?cluster="+c}); 
                 }
             });
     }

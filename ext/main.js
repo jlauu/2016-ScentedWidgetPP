@@ -220,8 +220,12 @@ function init(userID) {
             }
             if (cname)  sessionMgr.registerTab(tab, cname);
         }
-        if (cname) {
+        if (info.url && cname) {
             var last = sessionMgr.getLastLink();
+            // Bad capture
+            if (!last || last.from == last.to) {
+                last = {from: tab.url, to: normalizeUrl(info.url)};
+            }
             // New url is added as a link
             if (last && last.to == url) {
                 var links = [{from: last.from, to: last.to}];
