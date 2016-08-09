@@ -7,8 +7,6 @@ var SWPP = (function (SWPP, _d3) {
     function lasso_start () {
         lasso.items()
             .classed({"not_possible":true,"selected":false})
-        .selectAll("circle")
-            .style("fill", null)
     }
 
     function lasso_draw () {

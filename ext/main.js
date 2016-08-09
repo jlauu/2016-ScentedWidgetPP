@@ -56,15 +56,18 @@ function init(userID) {
         if (request.name) {
             if (request.edit_type == 'add') {
                 clusterMgr.addToCluster(request.name, 
-                                      request.nodes || [],
-                                      request.links || [],
-                                      request.keywords || []);
+                                      request.nodes,
+                                      request.links,
+                                      request.keywords,
+                                      request.children);
             } else if (request.edit_type == 'remove') {
                 clusterMgr.removeFromCluster(request.name, 
-                                      request.nodes || [],
-                                      request.links || [],
-                                      request.keywords || []);
-            } else if (request.new_name) {
+                                      request.nodes,
+                                      request.links,
+                                      request.keywords,
+                                      request.children);
+            }
+            if (request.new_name) {
                 clusterMgr.editName(request.name, request.new_name);
                 uploadClusters(request.new_name, function () {
                    downloadClusters({name: request.new_name, userid: userID});

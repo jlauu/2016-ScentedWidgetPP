@@ -60,7 +60,7 @@ var ClusterManager = (function () {
             return c && c.id;
         }
 
-        function addToCluster(name, urls, links, keywords) {
+        function addToCluster(name, urls, links, keywords, children) {
             var c = get(name);
             if (urls) {
                 urls.forEach(function (url) {
@@ -77,9 +77,14 @@ var ClusterManager = (function () {
                     c.addKeyword(kw);
                 });
             }
+            if (children) {
+                children.forEach(function (c) {
+                    addChild(name, c);
+                });
+            }
         }
 
-        function removeFromCluster(name, urls, links, keywords) {
+        function removeFromCluster(name, urls, links, keywords, children) {
             var c = get(name);
             if (urls) {
                 urls.forEach(function (url) {
@@ -97,11 +102,18 @@ var ClusterManager = (function () {
                 });
             }
 
+            if (children) {
+                children.forEach(function (c) {
+                    removeChild(name, c);
+                });
+            }
+
             // Delete cluster if empty
             if (c.getUrls().length <= 0) {
-                clusters.delete(c.name);
+                clusters.delete(name);
                 idCluster.delete(c.id);
-                nameToId.delete(c.name);
+                nameToId.delete(name);
+                setParent(name, null);
             }
         }
 
@@ -150,6 +162,8 @@ var ClusterManager = (function () {
             return Array.from(forest.get(id))
                 .map(function(id) {
                     return idCluster.get(id);
+                }).filter(function (id) {
+                    return id;  
                 });
         }
 

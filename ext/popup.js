@@ -155,13 +155,25 @@ function getClusterResponse(data, callback) {
 function removeFromCluster() {
     var nodes = SWPP.getLassoSelection();
     nodes.remove();
-    nodes = nodes.data().map(function (d) {return d.url});
-    chrome.runtime.sendMessage({
-        'type':'cluster_edit',
-        'edit_type': 'remove',
-        'name': cluster_data.name,
-        'nodes':nodes
+    nodes = nodes.data();
+    nodes.forEach(function (n) {
+        if (n.cluster_type) {
+            chrome.runtime.sendMessage({
+                'type':'cluster_edit',
+                'edit_type': 'remove',
+                'name': cluster_data.name,
+                'children': [n.name]                
+            });
+        } else {
+            chrome.runtime.sendMessage({
+                'type':'cluster_edit',
+                'edit_type': 'remove',
+                'name': n.cluster,
+                'nodes': [n.url]
+            });
+        }
     });
+    window.location = window.location;
 }
 
 function editClusterName() {
