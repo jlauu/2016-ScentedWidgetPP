@@ -3,6 +3,7 @@
 <title>SWPP - Graph Display</title>
 <script src="lib/URI.js" charset="utf-8"></script>
 <script src="lib/d3.v3.min.js" charset="utf-8"></script>
+<script src="lib/lasso.js" charset="utf-8"></script>
 <script src="utils.js"></script>
 <script src="SWPPGraph.js"></script>
 <script src="MiniSWPP.js"></script>
@@ -77,6 +78,44 @@ text {
     text-align: right;
 }
 
+#lasso-functions {
+    position: fixed;
+    left: 10px;
+    bottom: 10px;
+    text-align: left;
+}
+
+/* Lasso */
+.dot {
+      stroke: #000;
+}
+
+.lasso path {
+      stroke: rgb(80,80,80);
+        stroke-width:2px;
+}
+
+.lasso .drawn {
+      fill-opacity:.05 ;
+}
+
+.lasso .loop_close {
+      fill:none;
+        stroke-dasharray: 4,4;
+}
+
+.lasso .origin {
+      fill:#3399FF;
+        fill-opacity:.5;
+}
+
+.not_possible {
+      fill:rgb(200,200,200);
+}
+
+.possible {
+      fill:#EC888C;
+}
 
 </style>
 </head>
@@ -87,5 +126,6 @@ text {
     </div>
     <div id="keywords-list"></div>
     <div class="svg-container"></div>
+    <div id="lasso-functions"></div>
 </body>
 </html>

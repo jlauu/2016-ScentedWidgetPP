@@ -59,6 +59,11 @@ function init(userID) {
                                       request.nodes || [],
                                       request.links || [],
                                       request.keywords || []);
+            } else if (request.edit_type == 'remove') {
+                clusterMgr.removeFromCluster(request.name, 
+                                      request.nodes || [],
+                                      request.links || [],
+                                      request.keywords || []);
             } else if (request.new_name) {
                 clusterMgr.editName(request.name, request.new_name);
                 uploadClusters(request.new_name, function () {
@@ -208,12 +213,15 @@ function init(userID) {
         if (tab.url.includes("chrome://")) return;
         var url = normalizeUrl(tab.url);
         var cname = sessionMgr.clusterOfTab(tabId);
+        cname = clusterMgr.has(cname) ? cname : null;
+        sessionMgr.registerTab(tab, cname);
         // Try to find associated cluster
         var clusters = clusterMgr.getClustersByUrl(url);
         if (clusters.length && cname != clusters[0].name) {
             cname = clusters[0].name
         } else if (!cname && tab.openerTabId) {
             cname = sessionMgr.clusterOfTab(tab.openerTabId);
+            cname = clusterManager.has(cname) ? cname : null;
         }
         sessionMgr.registerTab(tab, cname);
 
@@ -232,7 +240,7 @@ function init(userID) {
                 clusterMgr.addToCluster(cname, [url], [], []);
             }
             sessionMgr.registerTab(tab, cname);
-        }     
+        }
     });
 
     // Save data to file before closing

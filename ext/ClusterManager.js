@@ -98,7 +98,7 @@ var ClusterManager = (function () {
             }
 
             // Delete cluster if empty
-            if (c.getUrls.length <= 0) {
+            if (c.getUrls().length <= 0) {
                 clusters.delete(c.name);
                 idCluster.delete(c.id);
                 nameToId.delete(c.name);

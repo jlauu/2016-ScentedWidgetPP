@@ -32,19 +32,19 @@ function UserCluster(name, keywords, graph) {
 
     this.hasUrl = function (url) {
 	    return this.graph.urls.has(url);
-	};
+    };
 
     this.removeUrl = function (url) {
         this.graph.removeNode(url);
-	};
+    };
 
     this.addLink = function (from, to) {
         this.graph.addLink(from, to);
-	};
+    };
 
     this.removeLink = function (from, to) {
-		this.graph.removeLink(from, to);
-	};
+        this.graph.removeLink(from, to);
+    };
 
     this.getKeywords = function () {
         var kws = Array.from(this.keywords);

@@ -115,11 +115,18 @@ var SWPP = (function (window) {
         force.start();
     }
 
+    module.resetStyle = function () {
+        nodes.selectAll("circle")
+            .style("fill", function (d) {
+                var f = module.config.node_style_fill;
+                return color(f ? f(d) : d.group);
+            })
+            .attr("r", module.config.node_attr_r || 5)
+    }
+
     module.defineNodes = function (nodes) {
           nodes.enter().append("g")
             .attr("class", "node")
-            .attr("cx", function (d) {return d.x;})
-            .attr("cy", function (d) {return d.y;})
             .append("circle")
             .style("fill", function (d) {
                 var f = module.config.node_style_fill;

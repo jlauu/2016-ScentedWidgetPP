@@ -73,6 +73,13 @@ function draw() {
     SWPP.init(config);
     drawTitle();
     drawKeywords();
+    drawSelectionButtons();
+}
+
+function drawSelectionButtons() {
+    d3.select("#lasso-functions").append("button")
+        .text("Remove Selected")
+        .on("click", removeFromCluster);
 }
 
 function drawKeywords() {
@@ -143,6 +150,18 @@ function getClusterResponse(data, callback) {
     config.json = cluster_data.graph;
     config.children = cluster_data.children;
     callback();
+}
+
+function removeFromCluster() {
+    var nodes = SWPP.getLassoSelection();
+    nodes.remove();
+    nodes = nodes.data().map(function (d) {return d.url});
+    chrome.runtime.sendMessage({
+        'type':'cluster_edit',
+        'edit_type': 'remove',
+        'name': cluster_data.name,
+        'nodes':nodes
+    });
 }
 
 function editClusterName() {
