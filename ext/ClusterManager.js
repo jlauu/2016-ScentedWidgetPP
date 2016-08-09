@@ -224,6 +224,4 @@ var ClusterManager = (function () {
             return instance;
         }
     };
-
-
 })();
