@@ -61,12 +61,9 @@ function init(userID) {
                                       request.keywords || []);
             } else if (request.new_name) {
                 clusterMgr.editName(request.name, request.new_name);
-                uploadClusters();
-                // Populate unique id within server db and retrieve it
-                if (!clusterMgr.hasId(request.new_name)) {
-                    uploadClusters(request.new_name);
-                    downloadClusters({name: request.new_name, userid: userID});
-                }
+                uploadClusters(request.new_name, function () {
+                   downloadClusters({name: request.new_name, userid: userID});
+                });
             }
         }
     }
@@ -208,18 +205,18 @@ function init(userID) {
 
     // Update clusterMgr on tab update
     chrome.tabs.onUpdated.addListener(function (tabId, info, tab) {
+        if (tab.url.includes("chrome://")) return;
         var url = normalizeUrl(tab.url);
         var cname = sessionMgr.clusterOfTab(tabId);
         // Try to find associated cluster
-        if (!cname) {
-            var clusters = clusterMgr.getClustersByUrl(url);
-            if (clusters.length) {
-                cname = clusters[0].name
-            } else if (tab.openerTabId) {
-                cname = sessionMgr.clusterOfTab(tab.openerTabId);
-            }
-            if (cname)  sessionMgr.registerTab(tab, cname);
+        var clusters = clusterMgr.getClustersByUrl(url);
+        if (clusters.length && cname != clusters[0].name) {
+            cname = clusters[0].name
+        } else if (!cname && tab.openerTabId) {
+            cname = sessionMgr.clusterOfTab(tab.openerTabId);
         }
+        sessionMgr.registerTab(tab, cname);
+
         if (info.url && cname) {
             var last = sessionMgr.getLastLink();
             // Bad capture
