@@ -225,7 +225,7 @@ function init(userID) {
             cname = clusters[0].name
         } else if (!cname && tab.openerTabId) {
             cname = sessionMgr.clusterOfTab(tab.openerTabId);
-            cname = clusterManager.has(cname) ? cname : null;
+            cname = clusterMgr.has(cname) ? cname : null;
         }
         sessionMgr.registerTab(tab, cname);
 
