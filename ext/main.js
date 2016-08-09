@@ -213,7 +213,8 @@ function init(userID) {
 
     // Update clusterMgr on tab update
     chrome.tabs.onUpdated.addListener(function (tabId, info, tab) {
-        if (tab.url.includes("chrome://")) return;
+        if (tab.url.includes("chrome://") ||
+            tab.url.includes("chrome-extension://")) return;
         var url = normalizeUrl(tab.url);
         var cname = sessionMgr.clusterOfTab(tabId);
         cname = clusterMgr.has(cname) ? cname : null;
