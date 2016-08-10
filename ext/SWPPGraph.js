@@ -203,8 +203,8 @@ var SWPP = (function (window) {
         var k = module.getScaledForce();
         var config = module.config;
         var ld = validCfg(config.linkDistance, 10 / k);
-        var charge = validCfg(config.charge, -1);
-        force.charge(charge + ld * -.5)
+        var charge = validCfg(config.charge, -1) + ld * - 5;
+        force.charge(charge * k)
             //.charge(function (d) {
             //    return (module.hasLink(d) ? charge * ld *.2 : charge) / k;
             //})
@@ -212,7 +212,7 @@ var SWPP = (function (window) {
             // TODO: scale links 
             //.linkDistance(config.linkDistance || 15)
             //.linkStrength(config.linkStrength || .2)
-            .resume();
+            .start();
     };
 
     // Virtual function to modify or select a subset of the original graph

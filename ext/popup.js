@@ -5,7 +5,7 @@ var config = {
     node_attr_r: function (d) {return d.cluster_type ? 8 : 5},
     node_key: function (d) {return d.cluster+d.id;},
     gravity: .1,
-    charge: -5,
+    charge: -100,
     linkDistance: 30,
     linkStrength: .5,
     tabs: null,

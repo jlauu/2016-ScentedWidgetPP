@@ -1,5 +1,5 @@
 // MiniSWPP.js - Extends base graph with popup-specific layout/behavior
-var SWPP = (function (SWPP, _d3) {
+var SWPP = (function (SWPP) {
     // Extend with interaction
     var super_preStart = SWPP.preStart;
     var lasso;
@@ -55,7 +55,7 @@ var SWPP = (function (SWPP, _d3) {
         });
 
         // http://bl.ocks.org/skokenes/511c5b658c405ad68941
-        if (_d3.lasso) {
+        if (d3.lasso) {
             lasso = d3.lasso()
                         .items(nodes)
                         .hoverSelect(true)
@@ -81,4 +81,4 @@ var SWPP = (function (SWPP, _d3) {
         });
     };
     return SWPP;
-})(SWPP || {}, d3);
+})(SWPP || {});
