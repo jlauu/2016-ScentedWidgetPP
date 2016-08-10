@@ -2,7 +2,20 @@
 // Graph layout and display configuration
 var config = {
     node_style_fill: function (d) {return d.cluster;},
-    node_attr_r: function (d) {return d.cluster_type ? 8 : 5},
+    node_style_stroke: function (d) {
+        if (d.cluster_type) {
+            return "white";
+        } else {
+            return d.url === config.url ? "black" : "white";
+        }
+    },
+    node_attr_r: function (d) {
+        if (d.cluster_type) {
+           return 8;
+        } else { 
+           return d.url === config.url ? 8 : 5;
+        }
+    },
     node_key: function (d) {return d.cluster+d.id;},
     gravity: .1,
     charge: -100,
@@ -10,6 +23,7 @@ var config = {
     linkStrength: .5,
     tabs: null,
     json: null,
+    url: null
 };
 
 var cluster_data = null;

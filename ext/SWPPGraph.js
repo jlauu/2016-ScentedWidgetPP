@@ -119,6 +119,7 @@ var SWPP = (function (window) {
 
     module.resetStyle = function () {
         nodes.selectAll("circle")
+            .style("stroke", module.config.node_style_fill || "white")
             .style("fill", function (d) {
                 var f = module.config.node_style_fill;
                 return color(f ? f(d) : d.group);
@@ -130,11 +131,7 @@ var SWPP = (function (window) {
           nodes.enter().append("g")
             .attr("class", "node")
             .append("circle")
-            .style("fill", function (d) {
-                var f = module.config.node_style_fill;
-                return color(f ? f(d) : d.group);
-            })
-            .attr("r", module.config.node_attr_r || 5)
+         module.resetStyle();
          nodes.exit()
             .each(function (d) {
                 links.filter(function (l) {
