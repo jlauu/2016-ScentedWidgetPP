@@ -53,6 +53,11 @@ function main () {
                         setPopupSize(600,500);
                         getClusterResponse(response.jsons[0], draw);
                     } else {
+                        chrome.runtime.sendMessage({
+                            type: "register",
+                            tab: config.tab,
+                            cluster_id: null
+                        });
                         promptNewCluster();
                     }
                 });
