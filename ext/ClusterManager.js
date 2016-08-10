@@ -182,6 +182,7 @@ var ClusterManager = (function () {
             var c_id = nameToId.get(cname);
             var p_id = nameToId.get(pname);
             if (forest.has(p_id)) {
+                setParent(c_id, null);
                 forest.get(p_id).delete(c_id);
             }
         }

@@ -74,6 +74,35 @@ function draw() {
     drawTitle();
     drawKeywords();
     drawSelectionButtons();
+    drawNewClusterField();
+}
+
+function drawNewClusterField() {
+    createInputBox('new-sub-cluster', 'Form cluster', function (name) {
+        var nodes = SWPP.getLassoSelection();
+        var data = nodes.data();
+        if (data) {
+            var links = config.json.links.filter(function (l) {
+                return ['source','target'].every(function (prop) {
+                    return data.some(function (d) {
+                        return l[prop] === d;
+                    });
+                });
+            }).map(function (l) {
+                return {from: l.source.url, to: l.target.url};  
+            });
+            // Create new cluster and initialize it
+            chrome.runtime.sendMessage({
+                type:'cluster_new',
+                name: name,
+                urls: data.map(function (d) {return d.url;}),
+                links: links,
+                parent: cluster_data.name,
+            });
+            // Delete nodes from their old clusters
+            removeFromCluster();
+        }
+    });
 }
 
 function drawSelectionButtons() {
@@ -83,8 +112,7 @@ function drawSelectionButtons() {
 }
 
 function drawKeywords() {
-    createInputBox('keywords', 'Add Keyword', function () {
-        var kws = d3.select('#keywords-input')[0][0].value;
+    createInputBox('keywords', 'Add Keyword', function (kws) {
         kws = kws.split(' ');
         kws.forEach(function (kw) {
             cluster_data.keywords.push(kw);
@@ -115,10 +143,14 @@ function drawTitle() {
 }
 
 function createInputBox(id, title, callback) {
-    function clickhandler () {
-        callback();
-        d3.select('#'+id+'-input')
+    var input_id = '#'+id+'-input';
+    function clickhandler (input) {
+        callback(input);
+        d3.select(input_id)
             .attr('placeholder', cluster_data.name);
+    }
+    function getText() {
+        return d3.select(input_id)[0][0].value;
     }
     var box = d3.select('#'+id);
     var input = box.append('input')
@@ -130,13 +162,13 @@ function createInputBox(id, title, callback) {
         .attr('placeholder', title)
         .on('keydown', function () {
             if (d3.event.key == 'Enter') 
-                callback();
+                callback(getText());
         });
    var apply = box.append('button')
         .attr('id', id + '-button')
         .attr('name','apply')
         .text('Apply')
-        .on('click', callback);
+        .on('click', function () {callback(getText());});
 }
 
 function setPopupSize(w, h) {

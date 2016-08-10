@@ -25,11 +25,13 @@ var SWPP = (function (window) {
             var targetNode = config.json.nodes.find(function (n) {
                 return n.id === e.target;
             });
-            links.push({
-                source: sourceNode,
-                target: targetNode,
-                value: e.value
-            });
+            if (sourceNode && targetNode) {
+                links.push({
+                    source: sourceNode,
+                    target: targetNode,
+                    value: e.value || 1
+                });
+            }
         });
         return links;
     }

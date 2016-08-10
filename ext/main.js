@@ -46,13 +46,30 @@ function init(userID) {
     // Requests a new cluster created
     function newCluster (request, sendResponse) {
         var c = clusterMgr.mkCluster(null, request.url);
-        var json = c.toJSON();
-        json.children = [];
-        sendResponse({json: json});
+        // If given any initial values
+        if (request.name || request.urls || request.links 
+            || request.keywords || request.children) {
+            request.nodes = request.urls;
+            request.edit_type = 'add';
+            request.new_name = request.name || undefined;
+            request.name = c.name;
+            editCluster(request, function () {
+                var name = request.new_name || request.name;
+                if (request.parent) {
+                    clusterMgr.setParent(name, request.parent);
+                }
+                c = clusterMgr.get(name);
+                sendResponse({json: c.toJSON()});
+            });
+        } else {
+            var json = c.toJSON();
+            json.children = [];
+            sendResponse({json: json});
+        }
     }
 
     // Updates a cluster
-    function editCluster (request) {
+    function editCluster (request, callback) {
         if (request.name) {
             if (request.edit_type == 'add') {
                 clusterMgr.addToCluster(request.name, 
@@ -70,7 +87,7 @@ function init(userID) {
             if (request.new_name) {
                 clusterMgr.editName(request.name, request.new_name);
                 uploadClusters(request.new_name, function () {
-                   downloadClusters({name: request.new_name, userid: userID});
+                   downloadClusters({name: request.new_name, userid: userID},callback);
                 });
             }
         }

@@ -1,9 +1,9 @@
 'use strict';
 var config = {
-    charge: -1,
+    charge: -7,
     chargeDistance: 70,
     gravity: 0,
-    linkDistance: 40,
+    linkDistance: 50,
     linkStrength: 1,
     friction: .2,
     groupToCluster: null,
