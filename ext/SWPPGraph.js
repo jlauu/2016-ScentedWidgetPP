@@ -50,10 +50,10 @@ var SWPP = (function (window) {
         });
     }
 
-    module.getScaledForce = function () {
+    module.getScaledForce = function (num) {
         //var n = d3.selectAll('.node')[0].length;
         var s = force.size();
-        var k = Math.sqrt(1 / (s[0] * s[1]));
+        var k = Math.sqrt((num || 1) / (s[0] * s[1]));
         return k < 1 ? 1 : k;
     }
 

@@ -40,6 +40,7 @@ var SWPP = (function (SWPP) {
         // Go to url in current tab
         .on("dblclick", function (d) {
             chrome.tabs.update({url: "https://" + d.url});
+            window.location = window.location;
         })
         // Dispaly url
         .on("mouseover", function (d) {

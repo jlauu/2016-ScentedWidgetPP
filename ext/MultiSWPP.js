@@ -7,11 +7,13 @@ var SWPP = (function (SWPP) {
         theta = null,
         reset_foci = null,
         dispatch = null,
-        selected_nodes = [];
+        selected_nodes = [],
+        base_charge = null;
 
     var super_preStart = SWPP.preStart;
     SWPP.preStart = function (force, svg, nodes, links) {
         super_preStart(force,svg,nodes,links);
+        base_charge = force.charge();
         function ring_foci_tick (t) {
             var height = SWPP.getHeight(); 
             var width  = SWPP.getWidth(); 
@@ -36,6 +38,13 @@ var SWPP = (function (SWPP) {
         SWPP.selectCluster = function (id) {
             selected = id;
             dispatch.select(id);
+            var n = nodes.filter(function (d) {
+                return d.group == selected;
+            }).data().length;
+            force.charge(function (d) {
+                var k = base_charge * (d.group == selected ? 50 : 1);
+                return k;
+            }).start();
         };
 
         SWPP.ring_shift_left = function () {
