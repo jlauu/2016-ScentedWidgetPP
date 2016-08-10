@@ -12,13 +12,15 @@ function UserCluster(name, keywords, graph) {
             this.graph.addNode(n.url);
         }, this);
         graph.links.forEach(function (l) {
-            var srcURL = graph.nodes.find(function (n) {
+            var src = graph.nodes.find(function (n) {
                 return n.id == l.source;
-            }).url;
-            var tgtURL = graph.nodes.find(function (n) {
+            });
+            var tgt = graph.nodes.find(function (n) {
                 return n.id == l.target;
-            }).url;
-            this.graph.addLink(srcURL, tgtURL);
+            });
+            if (tgt && src) {
+                this.graph.addLink(src.url, tgt.url);
+            }
         }, this);
     }
 
