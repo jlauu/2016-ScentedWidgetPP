@@ -21,13 +21,14 @@
   },
   "content_scripts": [
       {
-        "matches": ["http://*/*", "https://*/*"],
+        "matches": ["*://*/*"],
         "js": [
-            "lib/mutation-summary.js",
             "lib/URI.js",
-            "utils.js",
             "lib/jquery-3.1.0.min.js",
-            "sniffer.js"
+            "utils.js",
+            "sniffer.js",
+            "lib/notify.min.js",
+            "indicate_cluster.js"
         ]
       }
   ],
