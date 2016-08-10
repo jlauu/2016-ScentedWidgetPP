@@ -21,8 +21,7 @@ var ClusterManager = (function () {
             var results = getClusters().filter(function (c) {
                 return c.getKeywords().some(function (kw) {
                     return kw.toLowerCase().includes(text.toLowerCase());
-                });
-            });
+                }); });
             return results;
         }
 
@@ -151,7 +150,8 @@ var ClusterManager = (function () {
         }
 
         function setParent(cname, pname) {
-            removeChild(getParent(cname), cname);
+            var p = getParent(cname);
+            if (p) removeChild(p, cname);
             if (pname == null) return;
             addChild(pname, cname);
         }
