@@ -11,9 +11,12 @@ $(document).ready(function () {
     }, function (response) {
         if (response.jsons && response.jsons.length > 0) {
             cluster = response.jsons[0].name;
-            window.addEventListener("focus", function () {
+            if (!cluster.includes("_unnamed")) {
                 popup();
-            });
+                window.addEventListener("focus", function () {
+                    popup();
+                });
+            }
         }
     });
 });
