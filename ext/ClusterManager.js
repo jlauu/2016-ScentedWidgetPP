@@ -13,8 +13,14 @@ var ClusterManager = (function () {
         var forest = new Map(); // id -> [id]
         var uname_id = 0;
 
-        function getClusters() {
-            return Array.from(clusters.values());
+        function getClusters(include_unnamed) {
+            var cs = Array.from(clusters.values());
+            if (include_unnamed === true) {
+                cs = cs.filter(function (d) {
+                    return !d.name.includes(UNNAMED_PREFIX);
+                });
+            }
+            return cs;
         } 
 
         function search(text) {
@@ -44,6 +50,14 @@ var ClusterManager = (function () {
             if (url) cluster.addUrl(url);
             clusters.set(name, cluster);
             return cluster;
+        }
+
+        function rmCluster(name) {
+            var c = get(name);
+            clusters.delete(name);
+            idCluster.delete(c.id);
+            nameToId.delete(name);
+            setParent(name, null);
         }
 
         function get(name) {
@@ -114,10 +128,7 @@ var ClusterManager = (function () {
 
             // Delete cluster if empty
             if (c.getUrls().length <= 0) {
-                clusters.delete(name);
-                idCluster.delete(c.id);
-                nameToId.delete(name);
-                setParent(name, null);
+                rmCluster(c.name);
             }
         }
 
@@ -215,6 +226,7 @@ var ClusterManager = (function () {
             new_message_name: NEW_MSG,
             edit_message_name: EDIT_MSG,
             mkCluster: mkCluster,
+            rmCluster: rmCluster,
             addToCluster: addToCluster,
             removeFromCluster: removeFromCluster,
             loadJSON: loadJSON,

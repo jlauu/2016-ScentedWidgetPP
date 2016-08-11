@@ -95,14 +95,26 @@ function getClusterResponse(data, callback) {
     cluster_data = data;
     config.json = cluster_data.graph;
     config.children = cluster_data.children;
-    chrome.runtime.sendMessage({
-        'type':'cluster_viewed',
-        'name':cluster_data.name
-    });
-    config.current_node = data.graph.nodes.find(function (d) {
-        return d.url === config.url;
-    });
-    callback();
+    if (!data.name.includes("_unnamed")) {
+        chrome.runtime.sendMessage({
+            'type':'cluster_viewed',
+            'name':cluster_data.name
+        });
+        config.current_node = data.graph.nodes.find(function (d) {
+            return d.url === config.url;
+        });
+        callback();
+    } else {
+        setPopupSize(150,100);
+        d3.select('body').append('div')
+            .attr('id', 'create-cluster')
+            .text('Create Cluster')
+            .on("click", function() {
+                d3.select('#create-cluster').remove();
+                setPopupSize(600,500);
+                callback();
+            });
+    }
 }
 // Expects config.json to be defined
 function draw() {

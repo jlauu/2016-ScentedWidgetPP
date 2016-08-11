@@ -233,6 +233,11 @@ function init(userID) {
 
     // Unregister closed tab/window
     chrome.windows.onRemoved.addListener(function (windowId) {
+        var cname = sessionMgr.clusterOfWindowId(windowId);
+        if (cname.includes(clusterMgr.UNNAMED_PREFIX)) {
+            clusterMgr.rmCluster(cname);
+            deleteCluster({name: cname});
+        }
         sessionMgr.unregisterWindow(windowId);
     });
 
@@ -245,14 +250,16 @@ function init(userID) {
         if (tab.url.includes("chrome://") ||
             tab.url.includes("chrome-extension://")) return;
         var url = normalizeUrl(tab.url);
+        var cname;
+        // Current tab is associated
         var cname = sessionMgr.clusterOfTab(tabId);
-        cname = clusterMgr.has(cname) ? cname : null;
-        sessionMgr.registerTab(tab, cname);
-        // Try to find associated cluster
+        var cname = clusterMgr.has(cname) ? cname : null;
+        // Current url is associated
         var clusters = clusterMgr.getClustersByUrl(url);
-        if (clusters.length && cname != clusters[0].name) {
+        if (clusters.length) {
             cname = clusters[0].name
-        } else if (!cname && tab.openerTabId) {
+        // Referrer tab is associated
+        } else if (tab.openerTabId) {
             cname = sessionMgr.clusterOfTab(tab.openerTabId);
             cname = clusterMgr.has(cname) ? cname : null;
         }
@@ -274,6 +281,9 @@ function init(userID) {
             }
             sessionMgr.registerTab(tab, cname);
         // Unassociated
+        } else if (info.url) {
+            var c = clusterMgr.mkCluster(null, info.url);
+            sessionMgr.registerTab(tab, c.name);
         }
     });
 
