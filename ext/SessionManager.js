@@ -103,9 +103,9 @@ var SessionManager = (function () {
         function registerWindow (w, clusterId) {   
             if (w.type && w.type != 'normal') return;
             if (clusterId) {
-                windowClusters[w.id] = clusterId;
+                windowClusters.set(w.id, clusterId);
             } else {
-                windowClusters[w.id] = null;
+                windowClusters.set(w.id, null);
             }
         }
 
