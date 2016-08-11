@@ -59,6 +59,11 @@ var ClusterManager = (function () {
             return c && c.id;
         }
 
+        function setViewed(name) {
+            var c = clusters.get(name);
+            if (c) c.clearRecentlyAdded();
+        }
+
         function addToCluster(name, urls, links, keywords, children) {
             var c = get(name);
             if (urls) {
@@ -216,6 +221,7 @@ var ClusterManager = (function () {
             get: get,
             has: has,
             hasId: hasId,
+            setViewed: setViewed,
             getClusters: getClusters,
             getCombined: getCombined,
             getClustersByUrl: getClustersByUrl,

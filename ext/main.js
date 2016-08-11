@@ -86,10 +86,13 @@ function init(userID) {
             }
             if (request.new_name) {
                 clusterMgr.editName(request.name, request.new_name);
-                uploadClusters(request.new_name, function () {
-                   downloadClusters({name: request.new_name, userid: userID},callback);
-                });
             }
+            uploadClusters(request.new_name, function () {
+               downloadClusters({
+                   name: request.new_name || request.name, 
+                   userid: userID
+                },callback);
+            });
         }
     }
 
@@ -127,6 +130,7 @@ function init(userID) {
             var cs = data.clusters;
             cs.forEach(function (j) {
                 clusterMgr.loadJSON(j);
+                clusterMgr.setViewed(j.name);
             });
             if (callback) callback();
         });
@@ -138,6 +142,13 @@ function init(userID) {
         var w = request.window;
         if (tab) sessionMgr.registerTab(tab, request.cluster_id);
         if (w) sessionMgr.registerWindow(w, request.cluster_id);
+    }
+
+    function setClusterViewed(request) {
+        var cname = request.name;
+        if (cname && clusterMgr.has(name)) {
+            clusterMgr.setViewed(name);
+        }
     }
 
     var sessionMgr = SessionManager.getInstance(userID);
@@ -164,6 +175,7 @@ function init(userID) {
     messageHandlers[sessionMgr.register_message_name] = registerTabWindows;
     messageHandlers["upload_cluster"] = uploadClusters;
     messageHandlers["reload_cluster"] = downloadClusters;
+    messageHandlers["cluster_viewed"] = setClusterViewed;
 
     chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         if (request.type.includes(sessionMgr.capture_message_name)) {
@@ -228,7 +240,7 @@ function init(userID) {
         sessionMgr.unregisterTab(tabId);
     });
 
-    // Update clusterMgr on tab update
+    // Update user clusters on tab update
     chrome.tabs.onUpdated.addListener(function (tabId, info, tab) {
         if (tab.url.includes("chrome://") ||
             tab.url.includes("chrome-extension://")) return;
@@ -245,7 +257,7 @@ function init(userID) {
             cname = clusterMgr.has(cname) ? cname : null;
         }
         sessionMgr.registerTab(tab, cname);
-
+        // Tab is associated with a cluster
         if (info.url && cname) {
             var last = sessionMgr.getLastLink();
             // Bad capture
@@ -261,6 +273,7 @@ function init(userID) {
                 clusterMgr.addToCluster(cname, [url], [], []);
             }
             sessionMgr.registerTab(tab, cname);
+        // Unassociated
         }
     });
 

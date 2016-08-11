@@ -5,6 +5,8 @@ var config = {
     node_style_stroke: function (d) {
         if (d.cluster_type) return "white";
         if (d.url === config.url) return "black";
+        if (d.recentlyAdded) return "LimeGreen";
+        if (!config.current_node) return "white";
         var id = config.current_node.id;
         var connected = config.json.links.some(function (e) {
             return  (e.target == d.id && e.source == id) ||
@@ -93,6 +95,10 @@ function getClusterResponse(data, callback) {
     cluster_data = data;
     config.json = cluster_data.graph;
     config.children = cluster_data.children;
+    chrome.runtime.sendMessage({
+        'type':'cluster_viewed',
+        'name':cluster_data.name
+    });
     config.current_node = data.graph.nodes.find(function (d) {
         return d.url === config.url;
     });

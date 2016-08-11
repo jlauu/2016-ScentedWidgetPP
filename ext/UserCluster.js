@@ -6,6 +6,7 @@ function UserCluster(name, keywords, graph) {
     this.name = name;
     this.keywords = new Set(keywords) || new Set();
     this.graph = new BrowsingGraph();
+    this.recentlyAdded = new Set();
 
     if (graph) {
         graph.nodes.forEach(function (n) {
@@ -24,12 +25,17 @@ function UserCluster(name, keywords, graph) {
         }, this);
     }
 
+    this.clearRecentlyAdded = function () {
+        this.recentlyAdded = new Set();
+    }
+
     this.getUrls = function () {
         return this.graph.getUrls();
     };
 
     this.addUrl = function (url) {
         this.graph.addNode(url);
+        this.recentlyAdded.add(url);
     };
 
     this.hasUrl = function (url) {
@@ -66,7 +72,10 @@ function UserCluster(name, keywords, graph) {
 
     this.toJSON = function () {
         var cluster = this.graph.toJSON();
-        cluster.nodes.forEach(function (n) {n.cluster = this.name;}, this);
+        cluster.nodes.forEach(function (n) {
+            n.cluster = this.name;
+            n.recentlyAdded = this.recentlyAdded.has(n.url);
+        }, this);
         return {
             id: this.id,
             name: this.name,
