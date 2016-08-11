@@ -84,9 +84,9 @@ var SessionManager = (function () {
             return windowClusters.get(window_id);
         }
 
-        function registerTab(tab, clusterId) {
-            if (clusterId) {
-                tabClusters.set(tab.id, clusterId);
+        function registerTab(tab, clusterName) {
+            if (clusterName) {
+                tabClusters.set(tab.id, clusterName);
             } else if (tab.openerTabId && clusterOfTab(tab.openerTabId)) {
                 if (tab.url == 'chrome://newtab/') {
                     tabClusters.set(tab.id, null);
@@ -100,10 +100,10 @@ var SessionManager = (function () {
             }
         }
 
-        function registerWindow (w, clusterId) {   
+        function registerWindow (w, clusterName) {   
             if (w.type && w.type != 'normal') return;
-            if (clusterId) {
-                windowClusters.set(w.id, clusterId);
+            if (clusterName) {
+                windowClusters.set(w.id, clusterName);
             } else {
                 windowClusters.set(w.id, null);
             }
