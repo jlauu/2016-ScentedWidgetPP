@@ -3,18 +3,17 @@
 var config = {
     node_style_fill: function (d) {return d.cluster;},
     node_style_stroke: function (d) {
-        if (d.cluster_type) {
-            return "white";
-        } else {
-            return d.url === config.url ? "black" : "white";
-        }
+        if (d.cluster_type) return "white";
+        if (d.url === config.url) return "black";
+        var id = config.current_node.id;
+        var connected = config.json.links.some(function (e) {
+            return  (e.target == d.id && e.source == id) ||
+                    (e.target == id && e.source == d.id);
+        });
+        return connected ? "black" : "white";
     },
     node_attr_r: function (d) {
-        if (d.cluster_type) {
-           return 8;
-        } else { 
-           return d.url === config.url ? 8 : 5;
-        }
+        return d.cluster_type ? 8 : 5;
     },
     node_key: function (d) {return d.cluster+d.id;},
     gravity: .1,
@@ -23,7 +22,8 @@ var config = {
     linkStrength: .5,
     tabs: null,
     json: null,
-    url: null
+    url: null,
+    current_node: null
 };
 
 var cluster_data = null;
@@ -88,6 +88,16 @@ function promptNewCluster() {
         });
 }
 
+// Sets the config and cluster_data
+function getClusterResponse(data, callback) {
+    cluster_data = data;
+    config.json = cluster_data.graph;
+    config.children = cluster_data.children;
+    config.current_node = data.graph.nodes.find(function (d) {
+        return d.url === config.url;
+    });
+    callback();
+}
 // Expects config.json to be defined
 function draw() {
     SWPP.init(config);
@@ -195,13 +205,6 @@ function setPopupSize(w, h) {
     d3.select('html','body')
         .style('width', w)
         .style('height', h)
-}
-// Sets the config and cluster_data
-function getClusterResponse(data, callback) {
-    cluster_data = data;
-    config.json = cluster_data.graph;
-    config.children = cluster_data.children;
-    callback();
 }
 
 function removeFromCluster() {

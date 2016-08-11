@@ -119,7 +119,7 @@ var SWPP = (function (window) {
 
     module.resetStyle = function () {
         nodes.selectAll("circle")
-            .style("stroke", module.config.node_style_fill || "white")
+            .style("stroke", module.config.node_style_stroke || "white")
             .style("fill", function (d) {
                 var f = module.config.node_style_fill;
                 return color(f ? f(d) : d.group);
