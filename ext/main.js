@@ -99,14 +99,6 @@ function init(userID) {
             }
             if (request.new_name) {
                 clusterMgr.editName(request.name, request.new_name);
-                sessionMgr.getRegisteredTabs().forEach(function (t) {
-                    if(t.cluster == request.name) {
-                        chrome.tabs.sendMessage(t.id, {
-                            type: 'indicator', 
-                            new_name: request.new_name
-                        });
-                    }
-                });
             }
             uploadClusters(request.new_name, function () {
                downloadClusters({
@@ -263,11 +255,6 @@ function init(userID) {
     });
 
     chrome.tabs.onRemoved.addListener(function (tabId) {
-        var cname = sessionMgr.clusterOfWindow(tabId);
-        if (cname && cname.includes(clusterMgr.UNNAMED_PREFIX)) {
-            clusterMgr.rmCluster(cname);
-            deleteCluster({name: cname});
-        }
         sessionMgr.unregisterTab(tabId);
     });
 
