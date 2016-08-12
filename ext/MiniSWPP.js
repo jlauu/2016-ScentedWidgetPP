@@ -60,7 +60,7 @@ var SWPP = (function (SWPP) {
             lasso = d3.lasso()
                         .items(nodes)
                         .hoverSelect(true)
-                        .closePathDistance(75)
+                        .closePathDistance(300)
                         .closePathSelect(true)
                         .area(svg)
                         .on("start", lasso_start)
