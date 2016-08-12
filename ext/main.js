@@ -280,20 +280,27 @@ function init(userID) {
         // Tab is associated with a cluster
         if (info.url && cname) {
             var last = sessionMgr.getLastLink();
-            // Bad capture
+            // Fix a bad capture
             if (!last || last.from == last.to) {
                 last = {from: tab.url, to: normalizeUrl(info.url)};
             }
             // New url is added as a link
-            if (last && last.to == url) {
-                var links = [{from: last.from, to: last.to}];
-                clusterMgr.addToCluster(cname, [], links, []);
+            if (last && last.to == url && 
+                !clusterMgr.excludedIn(cname, last.from) &&
+                !clusterMgr.excludedIn(cname, last.to)) {
+                    var links = [{from: last.from, to: last.to}];
+                    clusterMgr.addToCluster(cname, [], links, []);
+                    sessionMgr.registerTab(tab, cname);
             // Add url as an individual node
-            } else {
+            } else if (!clusterMgr.excludedIn(cname, url)) {
                 clusterMgr.addToCluster(cname, [url], [], []);
+                sessionMgr.registerTab(tab, cname);
+            // Current url is excluded, start a background cluster
+            } else {
+                var c = clusterMgr.mkCluster(null, info.url);
+                sessionMgr.registerTab(tab, c.name);
             }
-            sessionMgr.registerTab(tab, cname);
-        // Unassociated
+        // Unassociated, start a background cluster
         } else if (info.url) {
             var c = clusterMgr.mkCluster(null, info.url);
             sessionMgr.registerTab(tab, c.name);

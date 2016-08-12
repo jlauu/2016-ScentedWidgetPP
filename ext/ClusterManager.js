@@ -78,6 +78,11 @@ var ClusterManager = (function () {
             if (c) c.clearRecentlyAdded();
         }
 
+        function excludedIn (name, url) {
+            var c = clusters.get(name);
+            return c.excludes(url);
+        }
+
         function addToCluster(name, urls, links, keywords, children) {
             var c = get(name);
             if (urls) {
@@ -107,11 +112,14 @@ var ClusterManager = (function () {
             if (urls) {
                 urls.forEach(function (url) {
                     c.removeUrl(url);
+                    c.exclude('*'+url+'*');
                 });
             }
             if (links) {
                 links.forEach(function (link) {
                     c.removeLink(link.from, link.to);
+                    c.exclude('*'+link.from+'*');
+                    c.exclude('*'+link.to+'*');
                 });
             }
             if (keywords) {
@@ -227,6 +235,7 @@ var ClusterManager = (function () {
             edit_message_name: EDIT_MSG,
             mkCluster: mkCluster,
             rmCluster: rmCluster,
+            excludedIn: excludedIn,
             addToCluster: addToCluster,
             removeFromCluster: removeFromCluster,
             loadJSON: loadJSON,

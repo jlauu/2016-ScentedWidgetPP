@@ -7,6 +7,7 @@ function UserCluster(name, keywords, graph) {
     this.keywords = new Set(keywords) || new Set();
     this.graph = new BrowsingGraph();
     this.recentlyAdded = new Set();
+    this.exclusions = new Set();
 
     if (graph) {
         graph.nodes.forEach(function (n) {
@@ -25,9 +26,19 @@ function UserCluster(name, keywords, graph) {
         }, this);
     }
 
+    this.exclude = function (pattern) {
+        this.exclusions.add(pattern);
+    };
+
+    this.excludes = function (url) {
+        return Array.from(this.exclusions).some(function (pat) {
+            return url.match(pat);
+        });
+    };
+
     this.clearRecentlyAdded = function () {
         this.recentlyAdded = new Set();
-    }
+    };
 
     this.getUrls = function () {
         return this.graph.getUrls();
@@ -80,7 +91,8 @@ function UserCluster(name, keywords, graph) {
             id: this.id,
             name: this.name,
             keywords: Array.from(this.keywords),
-            graph: cluster
+            graph: cluster,
+            exclusions: Array.from(this.exclusions)
         };
     };
     
