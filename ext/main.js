@@ -68,6 +68,16 @@ function init(userID) {
         }
     }
 
+    function deleteCluster(request, sendResponse) {
+        if (request.name) {
+            ServerConnection.sendJSON({
+                'type':'delete_cluster',
+                'userID':userID,
+                'name': request.name
+            }, sendResponse);
+        }
+    }
+
     // Updates a cluster
     function editCluster (request, callback) {
         if (request.name) {
@@ -83,6 +93,9 @@ function init(userID) {
                                       request.links,
                                       request.keywords,
                                       request.children);
+                if (!clusterMgr.has(request.name)) {
+                    deleteCluster({name: request.name});
+                }
             }
             if (request.new_name) {
                 clusterMgr.editName(request.name, request.new_name);
@@ -233,8 +246,8 @@ function init(userID) {
 
     // Unregister closed tab/window
     chrome.windows.onRemoved.addListener(function (windowId) {
-        var cname = sessionMgr.clusterOfWindowId(windowId);
-        if (cname.includes(clusterMgr.UNNAMED_PREFIX)) {
+        var cname = sessionMgr.clusterOfWindow(windowId);
+        if (cname && cname.includes(clusterMgr.UNNAMED_PREFIX)) {
             clusterMgr.rmCluster(cname);
             deleteCluster({name: cname});
         }
