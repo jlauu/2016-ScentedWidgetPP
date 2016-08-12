@@ -12,8 +12,7 @@ function init(userID) {
                 return !e[url] || !e[url].includes(sessionMgr.webhost);
         });
         if (pass_exclusions) {
-            sessionMgr.capture(type, request.event);
-        }
+            sessionMgr.capture(type, request.event); }
     }
 
     // Returns an array of cluster JSONs
@@ -22,7 +21,8 @@ function init(userID) {
             var results = clusterMgr.getClustersByUrl(request.url);
             results = results.map(function (c) {return c.toJSON();});
         } else if (request.name) {
-            var results = [clusterMgr.get(request.name).toJSON()];
+            var cluster = clusterMgr.get(request.name)
+            var results = cluster ? [cluster.toJSON()] : [];
         } else if (request.combine) {
             var results = [clusterMgr.getCombined()];
         } else {
@@ -45,7 +45,7 @@ function init(userID) {
 
     // Requests a new cluster created
     function newCluster (request, sendResponse) {
-        var c = clusterMgr.mkCluster(null, request.url);
+        var c = clusterMgr.mkCluster(null, normalizeUrl(request.url));
         // If given any initial values
         if (request.name || request.urls || request.links 
             || request.keywords || request.children) {
@@ -72,8 +72,10 @@ function init(userID) {
         if (request.name) {
             ServerConnection.sendJSON({
                 'type':'delete_cluster',
-                'userID':userID,
-                'name': request.name
+                'data': {
+                    'userID':userID,
+                    'name': request.name
+                }
             }, sendResponse);
         }
     }
@@ -263,29 +265,33 @@ function init(userID) {
         if (tab.url.includes("chrome://") ||
             tab.url.includes("chrome-extension://")) return;
         var url = normalizeUrl(tab.url);
-        var cname;
         // Current tab is associated
         var cname = sessionMgr.clusterOfTab(tabId);
-        var cname = clusterMgr.has(cname) ? cname : null;
+        cname = clusterMgr.has(cname) ? cname : null;
         // Current url is associated
         var clusters = clusterMgr.getClustersByUrl(url);
-        if (clusters.length) {
-            cname = clusters[0].name
+        if (clusters.length && 
+            !clusters[0].name.includes(clusterMgr.UNNAMED_PREFIX)) {
+            cname = clusters[0].name;
         // Referrer tab is associated
-        } else if (tab.openerTabId) {
+        } else if (!cname && tab.openerTabId) {
             cname = sessionMgr.clusterOfTab(tab.openerTabId);
             cname = clusterMgr.has(cname) ? cname : null;
         }
-        sessionMgr.registerTab(tab, cname);
         // Tab is associated with a cluster
         if (info.url && cname) {
             var last = sessionMgr.getLastLink();
+            // TODO: figure out redirects
             // Fix a bad capture
             if (!last || last.from == last.to) {
-                last = {from: tab.url, to: normalizeUrl(info.url)};
+                last = {from: url, to: normalizeUrl(info.url)};
             }
+            last = {
+                'from': normalizeUrl(last.from),
+                'to': normalizeUrl(last.to)
+            };
             // New url is added as a link
-            if (last && last.to == url && 
+            if (last && last.to == url && last.from != last.to &&
                 !clusterMgr.excludedIn(cname, last.from) &&
                 !clusterMgr.excludedIn(cname, last.to)) {
                     var links = [{from: last.from, to: last.to}];
@@ -297,12 +303,12 @@ function init(userID) {
                 sessionMgr.registerTab(tab, cname);
             // Current url is excluded, start a background cluster
             } else {
-                var c = clusterMgr.mkCluster(null, info.url);
+                var c = clusterMgr.mkCluster(null, normalizeUrl(info.url));
                 sessionMgr.registerTab(tab, c.name);
             }
         // Unassociated, start a background cluster
         } else if (info.url) {
-            var c = clusterMgr.mkCluster(null, info.url);
+            var c = clusterMgr.mkCluster(null, normalizeUrl(info.url));
             sessionMgr.registerTab(tab, c.name);
         }
     });

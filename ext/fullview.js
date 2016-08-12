@@ -21,7 +21,11 @@ function main () {
             cluster_data = response.jsons[0];
             config.json = cluster_data.graph;
             config.keywords = cluster_data.keywords;
-            config.groupToCluster = cluster_data.clusters;
+            if (cluster_data.clusters) {
+                config.groupToCluster = cluster_data.clusters;
+            } else {
+                config.groupToCluster = {'0': cluster_data.name};
+            }
             SWPP.init(config);
             SWPP.ring_shift_right();
         }
