@@ -47,7 +47,7 @@ var SWPP = (function (SWPP) {
         nodes
         // Go to url in current tab
         .on("dblclick", function (d) {
-            chrome.tabs.update({url: "https://" + d.url});
+            chrome.tabs.update({url: d.url.includes("http") ? d.url : "http://" + d.url});
             window.location = window.location;
         })
         // Display url

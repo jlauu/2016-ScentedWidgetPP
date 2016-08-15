@@ -6,7 +6,8 @@ function normalizeUrl(u, resolve_with) {
         url = URI(u);
     }
     url = url.normalize();
-    return (url.hostname() || "") +
+    return (url.protocol() || "") +
+           (url.hostname() || "") +
            (url.path() || "") +
            (url.search() || "");
 }
