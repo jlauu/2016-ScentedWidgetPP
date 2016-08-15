@@ -7,6 +7,10 @@ var SWPP = (function (SWPP) {
     function lasso_start () {
         lasso.items()
             .classed({"not_possible":true,"selected":false})
+        if (SWPP.favicon) {
+            d3.selectAll(".node image")
+                .style("visibility", "hidden");
+        }
     }
 
     function lasso_draw () {
@@ -18,13 +22,17 @@ var SWPP = (function (SWPP) {
     }
 
     function lasso_end () {
-        lasso.items().filter(function(d) {return d.selected==false;})
+        var unselected = lasso.items().filter(function(d) {return d.selected==false;})
             .classed({"not_possible":false,"possible":false});
         SWPP.resetStyle();
-        lasso.items().filter(function(d) {return d.selected===true;})
+        var selected = lasso.items().filter(function(d) {return d.selected===true;})
             .classed({"not_possible":false,"possible":false})
         .selectAll("circle")
             .style("fill", "red");
+        if (SWPP.favicon) {
+            unselected.selectAll("image")
+                .style("visibility", "visible");
+        }
     }
 
     SWPP.getScaledForce = function () {
@@ -42,7 +50,7 @@ var SWPP = (function (SWPP) {
             chrome.tabs.update({url: "https://" + d.url});
             window.location = window.location;
         })
-        // Dispaly url
+        // Display url
         .on("mouseover", function (d) {
             var text = svg.append("text")
                 .attr('id', 'url-text')

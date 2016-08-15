@@ -45,6 +45,12 @@ function init(userID) {
 
     // Requests a new cluster created
     function newCluster (request, sendResponse) {
+        if (request.name && clusterMgr.has(request.name)) {
+            editCluster(request, function () {
+                var c = clusterMgr.get(name);
+                sendResponse({json: c.toJSON()});   
+            });
+        }
         var c = clusterMgr.mkCluster(null, normalizeUrl(request.url));
         // If given any initial values
         if (request.name || request.urls || request.links 
