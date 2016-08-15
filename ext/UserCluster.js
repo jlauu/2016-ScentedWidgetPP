@@ -1,13 +1,18 @@
 'use strict';
 
 // TODO: inherit from BrowsingGraph
-function UserCluster(name, keywords, graph) {
+function UserCluster(name, keywords, graph, exclusions) {
     this.id = null;
     this.name = name;
     this.keywords = new Set(keywords) || new Set();
     this.graph = new BrowsingGraph();
     this.recentlyAdded = new Set();
     this.exclusions = new Set();
+    if (exclusions) {
+        exclusions.forEach(function (pat) {
+            this.exclusions.add(new RegExp(pat));
+        }, this);
+    }
 
     if (graph) {
         graph.nodes.forEach(function (n) {

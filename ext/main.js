@@ -122,6 +122,9 @@ function init(userID) {
             return !c.name.includes(clusterMgr.UNNAMED_PREFIX);
         }).map(function (c) {
             var json = c.toJSON();
+            json.exclusions = json.exclusions.map(function (e) {
+                return e.toString();
+            })
             json.userID = userID;
             return json;
         });

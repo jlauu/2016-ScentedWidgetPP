@@ -32,7 +32,9 @@ var ClusterManager = (function () {
         }
 
         function getCombined() {
-            var cs = getClusters();
+            var cs = getClusters().filter(function (c) {
+                return !c.name.includes(UNNAMED_PREFIX);
+            });
             var c = cs.pop();
             if (cs.length) {
                 return c.mergeJSON(cs);
@@ -83,9 +85,10 @@ var ClusterManager = (function () {
             return c.excludes(url);
         }
 
+        // TODO - remove redundant exclusions
         function excludeFrom (name, url) {
             var c = clusters.get(name);
-            return c.excludes(new RegExp('.*'+url+'.*'));
+            c.exclude(new RegExp('.*'+url+'.*'));
         }
 
         function addToCluster(name, urls, links, keywords, children) {
@@ -162,7 +165,7 @@ var ClusterManager = (function () {
 
         // Loads a cluster from json
         function loadJSON(json) {
-            var cluster = new UserCluster(json.name, json.keywords, json.graph);
+            var cluster = new UserCluster(json.name, json.keywords, json.graph, json.exclusions);
             if (json.id) cluster.id = json.id;
             clusters.set(cluster.name, cluster);
             idCluster.set(cluster.id, cluster);

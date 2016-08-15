@@ -3,7 +3,7 @@ var SWPP = (function (SWPP) {
     var getScale = SWPP.getScaledForce;
     var zoom;
     var zoom_value = 20;
-    var zoom_range = [0,100];
+    var zoom_range = [0,1000];
     var base_ld, base_charge;
 
     function zoomed () {
